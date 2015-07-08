@@ -6,6 +6,7 @@
 - ユーザは事前にログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - OpenShiftクライアントバイナリであるocコマンドはopenshift-clientパッケージに含まれています。
   - ハンズオン実施時には一時的に以下の認証つきURLから上記と同一のocコマンドをダウンロードすることもできます。
+  - TODO: add URL
 
 ## ログイン
 
@@ -61,9 +62,9 @@ Githubへのhookの設定
 
 MySQL
 
-## ルート追加
+## (Optional) MySQL init script handling
 
-oc expose
+## テンプレート
 
 ## Jenkins連携
 
@@ -72,6 +73,11 @@ oc expose
 - JenkinsをDockerイメージにする方法、os, php, ruby実行環境を包含しないといけないのでマニュアルで作るのは若干ヘビー
 - 共用のJenkins使う?
 - そもそもOpenShift特有の連携方法が今のところないのであまり嬉しくない
+- 7/10 3amにOpenShift CIのセッションがある
+
+## ルート追加
+
+oc expose
 
 ## チーム作業
 
