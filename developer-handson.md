@@ -226,16 +226,19 @@ $mysqli->close();
 
 ## トラブルシューティング
 
+ログを参照するためには以下のコマンドを利用します。
+
+ビルドに失敗した場合は`oc build-logs`でビルドログを参照します。
+
+デプロイに失敗した、もしくはデプロイは成功しているが正常に動いていない、という場合は`oc logs`で対象podのログを参照します。デプロイのリトライは`oc deploy --retry`で行うことができます。
+
 ```
-oc logs [pod-name]
 oc build-logs [build-name]
+oc logs [pod-name]
+oc deploy [dc-name] --retry
 ```
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
-
-## アプリケーションログ
-
-## チーム作業
 
 ## デモ
 
@@ -331,25 +334,116 @@ oc tag greenhat@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同様にリリースできます。
 
-### Docker image deploy
-### スケール
-### 障害復旧
-### OSパッチ
+### Dockerイメージのデプロイ
+
+`oc new-app`では、ソースコードではなく一般的なDockerイメージを指定することもできます。
+
+OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html)がかかっています。そのため、DockerfileでUID指定でユーザを作って動作するようなDockerイメージはそのままでは動作せず、パーミッションエラーで起動しないことに注意してください。openshiftでホストされているイメージはそのまま動作するように作られています。
+
+```
+oc new-app openshift/jenkins-1-centos
+```
+
+### スケールとローリングアップデート
+
+OpenShiftではアプリケーションコンテナを複数立ち上げることができます。接続はOpenShiftに含まれる`router`コンポーネントによって、接続数の少ないコンテナへロードバランスされます。`router`コンポーネントは[HAProxy](http://www.haproxy.org/)によって実装されており、`leastconn`ロードバランスがデフォルトで適用されるようになっています。
+
+```
+oc scale rc [rc-name] --replicas=2
+```
+
+負荷に応じて自動的にスケールを制御するオートスケールは将来のバージョンで実装される予定です。
+
+OpenShiftのpodのデプロイ方法ですが、デフォルトでコンテナを再生成`Recreate`します。`Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
+
+別のデプロイ方法として`Rolling`があります。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行います。デプロイ方法を変更するにはDeploymentConfigを編集します。
+
+```
+oc edit dc [dc-name]
+```
+
 ### ロールバック
-### ローリングアップデート
-### Gitトピックブランチ方式開発
+
+まずはロールバック対象となるデプロイ名を探します。
+
+```
+oc describe dc [dc-name]
+```
+
+ロールバック対象のデプロイ名を指定して`oc rollback`を発行します。発行すると、指定されたデプロメントと同じ内容の新しいデプロイメントが作成され、自動デプロイトリガーが無効化されます。
+
+```
+oc rollback [deployment-name]
+```
+
+問題が解決したあと、自動デプロイトリガーを有効化するには以下を発行します。
+
+```
+oc deploy [dc-name] --enable-triggers
+```
+
+### 障害復旧
+
+OpenShiftはサービスへの接続を監視しており、機能不全となっているpodは自動的に再起動します。pod内のプロセスを停止したり、podを停止したりしても短時間で復旧します。
+
+### OSパッチ
+
+openshiftプロジェクトのImageStreamに定義されているビルダーイメージにはミドルウェアやOSが含まれています。これらのミドルウェアやOSにセキュリティ修正などの変更がある場合には、`oc -import-image`を実行して新しいバージョンのイメージを取得します。関連するイメージで`latest`タグを参照しているアプリケーションなどは全て再ビルドされてデプロイされます。
+
+``
+# oc project openshift
+# oc get is
+NAME                                 DOCKER REPO                                                      TAGS                   UPDATED
+jboss-amq-6                          registry.access.redhat.com/jboss-amq-6/amq-openshift             6.2,6.2-84,latest      9 days ago
+jboss-eap6-openshift                 registry.access.redhat.com/jboss-eap-6/eap-openshift             6.4,6.4-207,latest     9 days ago
+jboss-webserver3-tomcat7-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat7-openshift   3.0,3.0-135,latest     9 days ago
+jboss-webserver3-tomcat8-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat8-openshift   3.0,3.0-137,latest     9 days ago
+mongodb                              registry.access.redhat.com/openshift3/mongodb-24-rhel7           2.4,latest,v3.0.0.0    9 days ago
+mysql                                registry.access.redhat.com/openshift3/mysql-55-rhel7             5.5,latest,v3.0.0.0    9 days ago
+nodejs                               registry.access.redhat.com/openshift3/nodejs-010-rhel7           0.10,latest,v3.0.0.0   9 days ago
+perl                                 registry.access.redhat.com/openshift3/perl-516-rhel7             5.16,latest,v3.0.0.0   9 days ago
+php                                  registry.access.redhat.com/openshift3/php-55-rhel7               5.5,latest,v3.0.0.0    9 days ago
+postgresql                           registry.access.redhat.com/openshift3/postgresql-92-rhel7        9.2,latest,v3.0.0.0    9 days ago
+python                               registry.access.redhat.com/openshift3/python-33-rhel7            3.3,latest,v3.0.0.0    9 days ago
+ruby                                 registry.access.redhat.com/openshift3/ruby-20-rhel7              2.0,latest,v3.0.0.0    9 days ago
+# oadm build-chain --all
+{
+	"fullname": "openshift/php",
+	"tags": [
+		"latest"
+	],
+	"edges": [
+		{
+			"fullname": "hello-php/hello-php",
+			"to": "hello-php/hello-php"
+		}
+	],
+	"children": [
+		{
+			"fullname": "hello-php/hello-php",
+			"tags": [
+				"latest"
+			]
+		}
+	]
+}
+# oc import-image php
+```
 
 ### Jenkins連携
 
-残念ながら、OpenShift v3のJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
+残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
 
 開発版ではサンプルアプリケーションとしてのJenkinsの定義が提供されています。 https://github.com/openshift/origin/tree/master/examples/jenkins
 
-TODO: 時間があればサンプルを実際にデモします。
-
 ## よくある質問
 
+- アプリケーションのログはどうしたらいいですか？
+  - Dockerコンテナの標準入出力は`oc logs`で参照でき、また、OpenShift上のjournaldにも集約されています。
+  - クラウド環境ではfluentdなどのネットワークログサーバに送信するというのが一般的です。
+  - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
 - oc get allの出力が古いもので埋まって見づらいのはどうしたらいいですか？
+
 
 ## リファレンス
 
