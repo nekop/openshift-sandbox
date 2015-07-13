@@ -1,4 +1,45 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [OpenShift v3 開発者向けハンズオン](#openshift-v3-%E9%96%8B%E7%99%BA%E8%80%85%E5%90%91%E3%81%91%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3)
+  - [準備](#%E6%BA%96%E5%82%99)
+  - [OpenShiftとは](#openshift%E3%81%A8%E3%81%AF)
+  - [ハンズオンシナリオの説明](#%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E3%81%AE%E8%AA%AC%E6%98%8E)
+  - [OpenShift Clientコマンド](#openshift-client%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
+  - [ログイン](#%E3%83%AD%E3%82%B0%E3%82%A4%E3%83%B3)
+  - [プロジェクト作成](#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90)
+  - [アプリケーション作成](#%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%BD%9C%E6%88%90)
+  - [ビルドの実行とアプリケーションの確認](#%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E5%AE%9F%E8%A1%8C%E3%81%A8%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E7%A2%BA%E8%AA%8D)
+  - [各種コマンド](#%E5%90%84%E7%A8%AE%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
+    - [基本的なコマンド](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
+    - [リソースのリスト](#%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%AA%E3%82%B9%E3%83%88)
+    - [oc get allの出力](#oc-get-all%E3%81%AE%E5%87%BA%E5%8A%9B)
+  - [自動ビルドの設定](#%E8%87%AA%E5%8B%95%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E8%A8%AD%E5%AE%9A)
+  - [データベースの追加とテンプレート](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E8%BF%BD%E5%8A%A0%E3%81%A8%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88)
+  - [データベースへの接続](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%B8%E3%81%AE%E6%8E%A5%E7%B6%9A)
+  - [トラブルシューティング](#%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0)
+  - [デモ](#%E3%83%87%E3%83%A2)
+    - [チームでの開発環境、テスト環境、本番環境の管理](#%E3%83%81%E3%83%BC%E3%83%A0%E3%81%A7%E3%81%AE%E9%96%8B%E7%99%BA%E7%92%B0%E5%A2%83%E3%80%81%E3%83%86%E3%82%B9%E3%83%88%E7%92%B0%E5%A2%83%E3%80%81%E6%9C%AC%E7%95%AA%E7%92%B0%E5%A2%83%E3%81%AE%E7%AE%A1%E7%90%86)
+      - [Gitベースの管理](#git%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%AE%A1%E7%90%86)
+      - [Dockerイメージベースの管理](#docker%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E7%AE%A1%E7%90%86)
+    - [Dockerイメージのデプロイ](#docker%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%81%AE%E3%83%87%E3%83%97%E3%83%AD%E3%82%A4)
+    - [スケールとローリングアップデート](#%E3%82%B9%E3%82%B1%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%AD%E3%83%BC%E3%83%AA%E3%83%B3%E3%82%B0%E3%82%A2%E3%83%83%E3%83%97%E3%83%87%E3%83%BC%E3%83%88)
+    - [ロールバック](#%E3%83%AD%E3%83%BC%E3%83%AB%E3%83%90%E3%83%83%E3%82%AF)
+    - [障害復旧](#%E9%9A%9C%E5%AE%B3%E5%BE%A9%E6%97%A7)
+    - [OSパッチ](#os%E3%83%91%E3%83%83%E3%83%81)
+    - [Jenkins連携](#jenkins%E9%80%A3%E6%90%BA)
+  - [よくある質問](#%E3%82%88%E3%81%8F%E3%81%82%E3%82%8B%E8%B3%AA%E5%95%8F)
+  - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # OpenShift v3 開発者向けハンズオン
+
+TODO: クライアントバイナリの準備
+TODO: 図を挿入
+TODO: memoの反映
+TODO: 
 
 ## 準備
 
