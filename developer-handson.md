@@ -27,7 +27,8 @@
     - [スケールとローリングアップデート](#%E3%82%B9%E3%82%B1%E3%83%BC%E3%83%AB%E3%81%A8%E3%83%AD%E3%83%BC%E3%83%AA%E3%83%B3%E3%82%B0%E3%82%A2%E3%83%83%E3%83%97%E3%83%87%E3%83%BC%E3%83%88)
     - [ロールバック](#%E3%83%AD%E3%83%BC%E3%83%AB%E3%83%90%E3%83%83%E3%82%AF)
     - [障害復旧](#%E9%9A%9C%E5%AE%B3%E5%BE%A9%E6%97%A7)
-    - [OSパッチ](#os%E3%83%91%E3%83%83%E3%83%81)
+    - [OSおよびミドルウェアのパッチ](#os%E3%81%8A%E3%82%88%E3%81%B3%E3%83%9F%E3%83%89%E3%83%AB%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%AE%E3%83%91%E3%83%83%E3%83%81)
+    - [テンプレート作成](#%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E4%BD%9C%E6%88%90)
     - [Jenkins連携](#jenkins%E9%80%A3%E6%90%BA)
   - [よくある質問](#%E3%82%88%E3%81%8F%E3%81%82%E3%82%8B%E8%B3%AA%E5%95%8F)
   - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
@@ -36,20 +37,17 @@
 
 # OpenShift v3 開発者向けハンズオン
 
-- TODO: クライアントバイナリの準備
 - TODO: 図を挿入
-- TODO: memoの反映
-- TODO: template追加
 
 ## 準備
 
 - このハンズオンの実行には構築済みのOpenShift Enterprise v3環境が必要です。Persistent Volumeは利用していません。
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
-- GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りにca.crtをGitHub Enterprise側にインストールする必要があります。
+- GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りに`/etc/openshift/master/ca.crt`をGitHub Enterprise側にインストールする必要があります。
 - OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれています。
-  - ハンズオン実施時には一時的に以下の認証つきURLから上記と同一のocコマンドをダウンロードすることもできます。
-  - TODO: add URL for Mac, Windows and Linux
+  - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。
+  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip)
 
 ## OpenShiftとは
 
@@ -62,8 +60,7 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 1. 簡単なphpアプリケーションをGitHubに作成し、OpenShiftに登録します。
 2. OpenShift上でビルドを実行し、GitのソースコードからDockerイメージをビルドしてOpenShift上に配置し、実行可能な状態にします。
 3. GitHubにpushされたタイミングで自動ビルドを行うように設定します。
-4. 
-5. MySQLを利用するphpアプリケーションを作成します。
+4. MySQLを利用するphpアプリケーションを作成します。
 6. トラブルシューティング
 
 ## OpenShift Clientコマンド
@@ -144,11 +141,11 @@ http://<app-name>.<your-openshift-cloud-domain>
 - `oc status`
 - `oc get all`
 - `oc get [resource]`
-- `oc describe [resource] [resource name]`
+- `oc describe [resource] [resource-name]`
 - `oc get all -o yaml`
-- `oc build-logs [build name]`
-- `oc logs [pod name]`
-- `oc delete [resource] [resource name]`
+- `oc build-logs [build-name]`
+- `oc logs [pod-name]`
+- `oc delete [resource] [resource-name]`
 - `oc delete all --all` # プロジェクトの内容全消し
 
 ### リソースのリスト
@@ -267,8 +264,6 @@ $mysqli->close();
 
 ## トラブルシューティング
 
-ログを参照するためには以下のコマンドを利用します。
-
 ビルドに失敗した場合は`oc build-logs`でビルドログを参照します。
 
 デプロイに失敗した、もしくはデプロイは成功しているが正常に動いていない、という場合は`oc logs`で対象podのログを参照します。デプロイのリトライは`oc deploy --retry`で行うことができます。
@@ -278,6 +273,8 @@ oc build-logs [build-name]
 oc logs [pod-name]
 oc deploy [dc-name] --retry
 ```
+
+ビルドやデプロイはnew-appの直後などはタイミングの問題により失敗したりします。その場合は少し待ってから再実行すると成功します。
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
 
@@ -306,7 +303,7 @@ oc expose se greenhat
 
 この後にWebhookで自動ビルドを設定します。これでGitのgreenhatのmasterブランチである開発バージョンは`greenhat.cloudapps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
 
-joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上hでは個人のプロジェクトへ`new-app`を発行し、自動ビルドを設定します。
+joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上では個人のプロジェクトへ`new-app`を発行し、自動ビルドを設定します。各個人は各個人の環境で開発を行い、プロジェクトのgitリポジトリへPull Requestを送信します。
 
 続いてテスト環境と本番環境を作成します。別環境へのリリースはgitベースとDockerイメージベースの2つのアプローチがあります。
 
@@ -374,6 +371,29 @@ oc tag greenhat@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
 タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同様にリリースできます。
+
+この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。
+
+```
+$ oc describe is hello-php
+Name:			hello-php
+Created:		25 hours ago
+Labels:			<none>
+Docker Pull Spec:	172.30.55.101:5000/hello-php/hello-php
+
+Tag     Spec                      Created       PullSpec
+latest  library/hello-php:latest   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v4
+                                   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v3
+                                   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
+                                  25 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v1
+                                  25 hours ago  library/hello-php:latest
+test    library/hello-php:latest   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v3
+                                   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
+                                  25 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v1
+                                  25 hours ago  library/hello-php:latest
+prod    library/hello-php:latest   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
+                                  25 hours ago  library/hello-php:latest
+```
 
 ### Dockerイメージのデプロイ
 
@@ -473,6 +493,27 @@ ruby                                 registry.access.redhat.com/openshift3/ruby-
 # oc import-image php
 ```
 
+### テンプレート作成
+
+既存のプロジェクトからテンプレートを作成するには以下のコマンドを発行します。
+
+```
+oc export bc,is,dc,svc --all --as-template=hello-php
+```
+
+ただし、現在ImageStreamのexportが失敗するバグがあるので、ImageStreamは除外してください。ImageStreamは以下のような内容で簡単に定義できます。
+
+```
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    creationTimestamp: null
+    name: hello-php
+  spec: {}
+  status:
+    dockerImageRepository: ""
+```
+
 ### Jenkins連携
 
 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
@@ -486,7 +527,7 @@ ruby                                 registry.access.redhat.com/openshift3/ruby-
   - クラウド環境ではfluentdなどのネットワークログサーバに送信するというのが一般的です。
   - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
 - oc get allの出力が古いもので埋まって見づらいのはどうしたらいいですか？
-
+  - 古いものの自動消去は検討中です。
 
 ## リファレンス
 
