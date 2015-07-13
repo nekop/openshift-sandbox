@@ -166,7 +166,7 @@ Builds:
 
 GitHubのリポジトリのページから、`Settings` -> `Webhooks & services` -> `Add webhook`でWebhookの追加が行えます。
 
-OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。
+OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。Webhookからのビルドでは、`oc describe build`や`oc describe isimage`の出力にgitのcommit SHA-1値が含まれるようになります。
 
 ## データベースの追加とテンプレート
 
