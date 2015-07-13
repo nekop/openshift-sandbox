@@ -55,6 +55,8 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
 
+![OpenShift marketecture](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/marketecture.jpg)
+
 ## ハンズオンシナリオの説明
 
 1. 簡単なphpアプリケーションをGitHubに作成し、OpenShiftに登録します。
