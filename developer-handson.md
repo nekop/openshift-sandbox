@@ -390,7 +390,7 @@ OpenShiftはサービスへの接続を監視しており、機能不全とな�
 
 openshiftプロジェクトのImageStreamに定義されているビルダーイメージにはミドルウェアやOSが含まれています。これらのミドルウェアやOSにセキュリティ修正などの変更がある場合には、`oc -import-image`を実行して新しいバージョンのイメージを取得します。関連するイメージで`latest`タグを参照しているアプリケーションなどは全て再ビルドされてデプロイされます。
 
-``
+```
 # oc project openshift
 # oc get is
 NAME                                 DOCKER REPO                                                      TAGS                   UPDATED
