@@ -39,14 +39,14 @@
 - TODO: クライアントバイナリの準備
 - TODO: 図を挿入
 - TODO: memoの反映
-- TODO: 
+- TODO: template追加
 
 ## 準備
 
 - このハンズオンの実行には構築済みのOpenShift Enterprise v3環境が必要です。Persistent Volumeは利用していません。
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
-- GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。
+- GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りにca.crtをGitHub Enterprise側にインストールする必要があります。
 - OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれています。
   - ハンズオン実施時には一時的に以下の認証つきURLから上記と同一のocコマンドをダウンロードすることもできます。
   - TODO: add URL for Mac, Windows and Linux
@@ -379,7 +379,7 @@ oc tag greenhat@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 `oc new-app`では、ソースコードではなく一般的なDockerイメージを指定することもできます。
 
-OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html)がかかっています。そのため、DockerfileでUID指定でユーザを作って動作するようなDockerイメージはそのままでは動作せず、パーミッションエラーで起動しないことに注意してください。openshiftでホストされているイメージはそのまま動作するように作られています。
+OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html)がかかっています。そのため、Dockerfileでユーザを作って動作するようなDockerイメージはそのままでは動作せず、実際にデプロイした場合はパーミッションエラーで起動しません。[Docker Hubのopenshiftユーザー](https://registry.hub.docker.com/repos/openshift/)でホストされているイメージはそのまま動作するように作られています。
 
 ```
 oc new-app openshift/jenkins-1-centos
@@ -429,7 +429,7 @@ oc deploy [dc-name] --enable-triggers
 
 OpenShiftはサービスへの接続を監視しており、機能不全となっているpodは自動的に再起動します。pod内のプロセスを停止したり、podを停止したりしても短時間で復旧します。
 
-### OSパッチ
+### OSおよびミドルウェアのパッチ
 
 openshiftプロジェクトのImageStreamに定義されているビルダーイメージにはミドルウェアやOSが含まれています。これらのミドルウェアやOSにセキュリティ修正などの変更がある場合には、`oc -import-image`を実行して新しいバージョンのイメージを取得します。関連するイメージで`latest`タグを参照しているアプリケーションなどは全て再ビルドされてデプロイされます。
 
