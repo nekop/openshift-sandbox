@@ -36,10 +36,10 @@
 
 # OpenShift v3 開発者向けハンズオン
 
-TODO: クライアントバイナリの準備
-TODO: 図を挿入
-TODO: memoの反映
-TODO: 
+- TODO: クライアントバイナリの準備
+- TODO: 図を挿入
+- TODO: memoの反映
+- TODO: 
 
 ## 準備
 
