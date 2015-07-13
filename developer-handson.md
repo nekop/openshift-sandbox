@@ -29,6 +29,8 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 OpenShift Clientコマンドは`oc`という単一の実行ファイルです。OpenShift Enterpriseのopenshift-clientsパッケージに含まれているので、管理者の方がどこかのWebサーバなどに配置して利用者にダウンロードできるようにしてください。
 
+また、利用者ではなく管理者が利用するコマンド`oadm`というコマンドもあります。マニュアルなどに`oadm`コマンド例が出てきた場合は、管理者作業を意味します。
+
 ## ログイン
 
 ```
@@ -43,7 +45,7 @@ TLS接続には`--certificate-authority`オプションに対応するca.crtを�
 
 ## プロジェクト作成
 
-プロジェクト名はOpenShift環境全体でユニークである必要がありますので、個人用プロジェクトは個人のidなどを名前に含めたほうが良いです(ex. tkimura-test-php)。また、OpenShiftの設計上、プロジェクト名は後からリネームすることはできません。プロジェクト情報をダンプして修正して取り込むことで、同一構成を新しい名前プロジェクトにすることは簡単にできます。
+プロジェクト名はOpenShift環境全体でユニークである必要がありますので、個人用プロジェクトは個人のidなどを名前に含めたほうが良いです(ex. `tkimura-test-php`)。また、OpenShiftの設計上、プロジェクト名は後からリネームすることはできません。プロジェクト情報をダンプして修正して取り込むことで、同一構成を新しい名前プロジェクトにすることは簡単にできます。
 
 ```
 oc new-project <project-name>
@@ -249,7 +251,6 @@ oc project greenhat
 oadm add-role-to-user admin alice
 oadm add-role-to-user admin ben
 oc project default
-
 ```
 
 joeがこのプロジェクトを構成していきます。もちろんaliceでもbenでもこの作業は可能です。
@@ -260,6 +261,8 @@ oc expose se greenhat
 ```
 
 この後にWebhookで自動ビルドを設定します。これでGitのgreenhatのmasterブランチである開発バージョンは`greenhat.cloudapps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
+
+joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上hでは個人のプロジェクトへ`new-app`を発行し、自動ビルドを設定します。
 
 続いてテスト環境と本番環境を作成します。別環境へのリリースはgitベースとDockerイメージベースの2つのアプローチがあります。
 
@@ -279,21 +282,21 @@ oc expose se test-greenhat
 テスト環境用の`test`, 本番環境用の`prod`というタグをImageStreamに作成しておきます。ImageStreamのtagは実際にはgitのブランチのように機能し、過去にタグ付けされたイメージの履歴を全て保持しています。
 
 ```
-oc tag library/hello-php:latest hello-php:test
-oc tag library/hello-php:latest hello-php:prod
+oc tag library/greenhat:latest greenhat:test
+oc tag library/greenhat:latest greenhat:prod
 ```
 
 次に、開発バージョンのDeploymentConfig, Service, Routeを複製します。ImageStreamは共用しますし、テスト環境や本番環境はビルドを行わないのでBuildConfigはありません。
 
 ```
-oc export dc hello-php -o json >> test-hello-php.json
-oc export se hello-php -o json >> test-hello-php.json
-oc export route hello-php -o json >> test-hello-php.json
+oc export dc greenhat -o json >> test-greenhat.json
+oc export se greenhat -o json >> test-greenhat.json
+oc export route greenhat -o json >> test-greenhat.json
 ```
 
-出力されたJSONファイルの`hello-php`を`test-hello-php`や`prod-hello-php`に置換するのですが、`ImageStreamTag`と`image`の部分に含まれる`hello-php`は置換対象から外します。
+出力されたJSONファイルの`greenhat`を`test-greenhat`や`prod-greenhat`に置換するのですが、`ImageStreamTag`と`image`の部分に含まれる`greenhat`は置換対象から外します。
 
-`ImageStreamTag`に`hello-php:latest`が定義されていますので、`hello-php:test`, `hello-php:prod`へ変更します。
+`ImageStreamTag`に`greenhat:latest`が定義されていますので、`greenhat:test`, `greenhat:prod`へ変更します。
 
 ```
 {
@@ -301,11 +304,11 @@ oc export route hello-php -o json >> test-hello-php.json
     "imageChangeParams": {
         "automatic": true,
         "containerNames": [
-            "hello-php"
+            "greenhat"
         ],
         "from": {
             "kind": "ImageStreamTag",
-            "name": "hello-php:latest"
+            "name": "greenhat:latest"
         }
     }
 }
@@ -315,15 +318,15 @@ oc export route hello-php -o json >> test-hello-php.json
 ここまで行なったらOpenShiftのmaster APIサーバへ流し込みます。
 
 ```
-cat test-hello-php.json | oc create -f -
+cat test-greenhat.json | oc create -f -
 ```
 
 これで準備は完了です。`test`タグが付けられたイメージが存在していないので、初回のデプロイは失敗します。
 
-`oc describe is hello-php`を実行して、適当なイメージに`test`タグを付与します。
+`oc describe is greenhat`を実行して、適当なイメージに`test`タグを付与します。
 
 ```
-oc tag hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx hello-php:test
+oc tag greenhat@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx greenhat:test
 ```
 
 タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同様にリリースできます。
@@ -334,6 +337,7 @@ oc tag hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ### OSパッチ
 ### ロールバック
 ### ローリングアップデート
+### Gitトピックブランチ方式開発
 
 ### Jenkins連携
 
