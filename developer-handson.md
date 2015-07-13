@@ -37,8 +37,6 @@
 
 # OpenShift v3 開発者向けハンズオン
 
-- TODO: 図を挿入
-
 ## 準備
 
 - このハンズオンの実行には構築済みのOpenShift Enterprise v3環境が必要です。Persistent Volumeは利用していません。
@@ -529,7 +527,7 @@ oc export bc,is,dc,svc --all --as-template=hello-php
 
 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
 
-開発版ではサンプルアプリケーションとしてのJenkinsの定義が提供されています。 https://github.com/openshift/origin/tree/master/examples/jenkins
+開発版では[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
 
 ## よくある質問
 
