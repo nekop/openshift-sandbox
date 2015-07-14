@@ -12,11 +12,11 @@
   - [アプリケーション作成](#%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%BD%9C%E6%88%90)
   - [ビルドの実行とアプリケーションの確認](#%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E5%AE%9F%E8%A1%8C%E3%81%A8%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E7%A2%BA%E8%AA%8D)
   - [Webコンソール](#web%E3%82%B3%E3%83%B3%E3%82%BD%E3%83%BC%E3%83%AB)
+  - [基本的な概念](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E6%A6%82%E5%BF%B5)
   - [各種コマンド](#%E5%90%84%E7%A8%AE%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
     - [基本的なコマンド](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
     - [リソースのリスト](#%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%AA%E3%82%B9%E3%83%88)
     - [oc get allの出力](#oc-get-all%E3%81%AE%E5%87%BA%E5%8A%9B)
-  - [基本的な概念](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E6%A6%82%E5%BF%B5)
   - [自動ビルドの設定](#%E8%87%AA%E5%8B%95%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E8%A8%AD%E5%AE%9A)
   - [データベースの追加とテンプレート](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E8%BF%BD%E5%8A%A0%E3%81%A8%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88)
   - [データベースへの接続](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%B8%E3%81%AE%E6%8E%A5%E7%B6%9A)
@@ -31,7 +31,6 @@
     - [障害復旧](#%E9%9A%9C%E5%AE%B3%E5%BE%A9%E6%97%A7)
     - [OSおよびミドルウェアのパッチ](#os%E3%81%8A%E3%82%88%E3%81%B3%E3%83%9F%E3%83%89%E3%83%AB%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%AE%E3%83%91%E3%83%83%E3%83%81)
     - [テンプレート作成](#%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88%E4%BD%9C%E6%88%90)
-    - [Jenkins連携](#jenkins%E9%80%A3%E6%90%BA)
   - [よくある質問](#%E3%82%88%E3%81%8F%E3%81%82%E3%82%8B%E8%B3%AA%E5%95%8F)
   - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
 
@@ -49,6 +48,7 @@
   - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。
   - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip)
 
+
 ## OpenShiftとは
 
 Dockerコンテナでアプリケーションを動作させるためのPaaS (Platform as a Service)基盤です。アプリケーションをDockerコンテナ上でビルドしてDockerイメージを作成し、Dockerコンテナとして動作させることができます。
@@ -57,19 +57,23 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 ![OpenShift marketecture](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/marketecture.jpg)
 
+
 ## ハンズオンシナリオの説明
 
 1. 簡単なphpアプリケーションをGitHubに作成し、OpenShiftに登録します。
-2. OpenShift上でビルドを実行し、GitのソースコードからDockerイメージをビルドしてOpenShift上に配置し、実行可能な状態にします。
+2. OpenShift上でビルドを実行し、GitのソースコードからDockerイメージを作成してデプロイし、実行可能な状態にします。
 3. GitHubにpushされたタイミングで自動ビルドを行うように設定します。
 4. MySQLを利用するphpアプリケーションを作成します。
 5. OpenShift上で何が発生しているのか、ログやイベント、コンテナ内部を調べます。
+6. イメージをテスト環境や本番環境へリリースするなど、応用シナリオのデモを行います。
+
 
 ## OpenShift Clientコマンド
 
 OpenShift Clientコマンドは`oc`という単一の実行ファイルです。OpenShift Enterpriseのopenshift-clientsパッケージに含まれているので、管理者の方がどこかのWebサーバなどに配置して利用者にダウンロードできるようにしてください。
 
 また、利用者ではなく管理者が利用するコマンド`oadm`というコマンドもあります。マニュアルなどに`oadm`コマンド例が出てきた場合は、管理者作業を意味します。
+
 
 ## ログイン
 
@@ -83,6 +87,7 @@ oc login <server>[:<port>]
 
 TLS接続には`--certificate-authority`オプションに対応するca.crtを指定するか、無指定の場合insecureのまま接続するかどうかの選択肢が出ますので、内部テスト利用などではca指定せずinsecure接続を選択しても良いでしょう。
 
+
 ## プロジェクト作成
 
 プロジェクト名はOpenShift環境全体でユニークである必要がありますので、個人用プロジェクトは個人のidなどを名前に含めたほうが良いです(ex. `tkimura-test-php`)。また、OpenShiftの設計上、プロジェクト名は後からリネームすることはできません。プロジェクト情報をダンプして修正して取り込むことで、同一構成を新しい名前プロジェクトにすることは簡単にできます。
@@ -90,6 +95,7 @@ TLS接続には`--certificate-authority`オプションに対応するca.crtを�
 ```
 oc new-project <project-name>
 ```
+
 
 ## アプリケーション作成
 
@@ -111,25 +117,25 @@ git push
 gitへpushしたらOpenShift上にアプリケーションを作成します。
 
 ```
-oc new-app <app-name> <repository>
-oc status
-oc get all
-oc get events
+oc new-app <repository>
 oc expose service <app-name>
 ```
 
 `oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.0/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
 
-`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, seという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`コマンド、および`oc get all`を使用します。
+`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, seという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
+
 
 ## ビルドの実行とアプリケーションの確認
 
 マニュアルでソースコードからDockerイメージを生成するビルドを実行します。成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。
 
-``
+```
 oc start-build <name>
 oc build-logs <name>-1
-``
+```
+
+最初のビルドはnew-appを発行してから少し時間がたてば開始されます。手動でビルドを発行したのと合わせて2つビルドが同時に走ると片方がDockerイメージのpushに失敗することがありますが気にしないでください。
 
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
@@ -137,15 +143,38 @@ oc build-logs <name>-1
 http://<app-name>.<your-openshift-cloud-domain>
 ```
 
+
 ## Webコンソール
 
-ログインにも利用したOpenShiftのmasterサーバにはWebコンソールが付属しています。デフォルトで8443ポートを利用するようになっています。ブラウザで開いてログインしてみましょう。
+ログインにも利用したOpenShiftのmasterサーバにはWebコンソールが付属しています。デフォルトでhttps, 8443ポートを利用するようになっています。ブラウザで開いてログインしてみましょう。
 
 ```
 https://<server>:8443/
 ```
 
-Webコンソールでは構成がグラフィカルに表示されるようになっています。後述するPodやServiceなどのオブジェクトがどのような位置付けなのかを理解するのに役立つでしょう。
+Webコンソールでは構成がグラフィカルに表示されるようになっています。今はアプリケーションのみの単一構成なのであまり見どころはないのですが、アプリケーションのpodを増殖させたり、データベースなどを追加するとにぎやかになります。
+
+
+## 基本的な概念
+
+- Pod
+  - コンテナの入れ物。デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
+  - [k8s Pod](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/pods.md)
+- Service (se, svc)
+  - pod群のIPアドレスを保持し、podへのアクセスポイントとなるKubernetesのオブジェクト
+  - [k8s Service](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md)
+- Replication Controller (rs)
+  - podの数を管理して制御するKubernetesのオブジェクト
+  - [k8s Replication Controller](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/replication-controller.md)
+- Deployment Config (dc)
+  - デプロイ管理を行うOpenShiftのオブジェクト
+- Build Config (bc)
+  - ビルド管理を行うOpenShiftのオブジェクト
+- Image Stream (is)
+  - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)のような構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されており、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
+- Route
+  - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。
+
 
 ## 各種コマンド
 
@@ -191,25 +220,6 @@ oc get allは以下のリソースをまとめて表示します。
 - service
 - pod
 
-## 基本的な概念
-
-- Pod
-  - コンテナの入れ物。デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
-  - [k8s Pod](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/pods.md)
-- Service (se, svc)
-  - pod群のIPアドレスを保持し、podへのアクセスポイントとなるKubernetesのオブジェクト
-  - [k8s Service](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md)
-- Replication Controller (rs)
-  - podの数を管理して制御するKubernetesのオブジェクト
-  - [k8s Replication Controller](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/replication-controller.md)
-- Deployment Config (dc)
-  - デプロイ管理を行うOpenShiftのオブジェクト
-- Build Config (bc)
-  - ビルド管理を行うOpenShiftのオブジェクト
-- Image Stream (is)
-  - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)のような構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されており、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
-- Route
-  - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。
 
 ## 自動ビルドの設定
 
@@ -238,7 +248,14 @@ Builds:
 
 GitHubのリポジトリのページから、`Settings` -> `Webhooks & services` -> `Add webhook`でWebhookの追加が行えます。
 
-OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。Webhookからのビルドでは、`oc describe build`や`oc describe isimage`の出力にgitのcommit SHA-1値が含まれるようになります。
+テストを行うにはいくつか空コミットを生成してpushします。gitで空コミットを作るには`git commit --allow-empty`を実行します。
+
+```
+git commit --allow-empty -m 'empty' && git push
+```
+
+OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。Webhookからのビルドでは、`oc describe build <build-name>`や`oc describe isimage <image>`の出力にgitのcommit SHA-1値が含まれるようになります。
+
 
 ## データベースの追加とテンプレート
 
@@ -260,6 +277,7 @@ oc new-app --template=mysql-ephemeral --param=DATABASE_SERVICE_NAME=hello-php-my
 ```
 
 テンプレートはデータベースの追加以外にも、任意の構成を簡単に作るための用途に幅広く利用できます。
+
 
 ## データベースへの接続
 
@@ -296,6 +314,18 @@ $mysqli->close();
 ?>
 ```
 
+メンテナンスなどのためのmysqlへのアクセスは以下の手順で行うことができます。
+
+```
+oc get pod
+oc describe pod <pod-name> # IP取得
+oc exec -ti -p <pod-name> bash
+mysql -h <host> -u <user> -p <password>
+```
+
+再度Webコンソールを開いてみてください。アプリケーションとデータベースが配置されているのが確認できます。
+
+
 ## トラブルシューティング
 
 ビルドに失敗した場合は`oc build-logs`でビルドログを参照します。
@@ -327,6 +357,7 @@ oc exec -it -p <pod-name> -- command <command-opions>
 ```
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
+
 
 ## デモ
 
@@ -370,6 +401,11 @@ oc expose se test-hello-php
 
 #### Dockerイメージベースの管理
 
+こちらの方法ではDockerイメージの開発版をテスト環境、そして本番環境へ昇格させるというDockerイメージベースのリリースを行うモデルです。
+
+![OpenShift Image Promotion](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/imagepromotion.png)
+
+
 テスト環境用の`test`, 本番環境用の`prod`というタグをImageStreamに作成しておきます。ImageStreamのtagは実際にはgitのブランチのように機能し、過去にタグ付けされたイメージの履歴を全て保持しています。
 
 ```
@@ -404,14 +440,11 @@ perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yam
       type: ImageChange
 ```
 
-
-ここまで行なったらOpenShiftのmaster APIサーバへ流し込みます。
+これで準備ができたので、new-appでオブジェクトを生成します。`test`タグが付けられたイメージをデプロイする設定ですが、そのようなイメージが存在していないので、初回のデプロイは失敗します。
 
 ```
 oc new-app -f test-hello-php.yaml
 ```
-
-これで準備は完了です。`test`タグが付けられたイメージが存在していないので、初回のデプロイは失敗します。
 
 `oc describe is hello-php`を実行して、適当なイメージに`test`タグを付与します。
 
@@ -419,9 +452,9 @@ oc new-app -f test-hello-php.yaml
 oc tag hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx hello-php:test
 ```
 
-タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同様にリリースできます。
+タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同じ流れで作成してリリースできます。
 
-この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。この例では"v3"の部分は読みやすいように書き換えてあります。実際には64ケタのsha256値です。
+この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。この例では"v3"などの部分は読みやすいように書き換えてありますが、実際には64ケタのsha256値です。
 
 ```
 $ oc describe is hello-php
@@ -444,11 +477,6 @@ prod    library/hello-php:latest   9 hours ago  172.30.55.101:5000/hello-php/hel
                                   25 hours ago  library/hello-php:latest
 ```
 
-いくつか空コミットを生成してpushし、新しいイメージをいくつか生成して、タグ付けを試してみましょう。gitで空コミットを作るには`git commit --allow-empty`を実行します。
-
-```
-git commit --allow-empty -m 'empty' && git push
-```
 
 ### Dockerイメージのデプロイ
 
@@ -460,6 +488,7 @@ OpenShift環境では[セキュリティのためにデフォルトではUIDの�
 oc new-app openshift/jenkins-1-centos
 ```
 
+
 ### スケールとローリングアップデート
 
 OpenShiftではアプリケーションコンテナを複数立ち上げることができます。接続はOpenShiftに含まれる`router`コンポーネントによって、接続数の少ないコンテナへロードバランスされます。`router`コンポーネントは[HAProxy](http://www.haproxy.org/)によって実装されており、`leastconn`ロードバランスがデフォルトで適用されるようになっています。
@@ -470,7 +499,7 @@ oc scale rc <rc-name> --replicas=2
 
 負荷に応じて自動的にスケールを制御するオートスケールは将来のバージョンで実装される予定です。
 
-OpenShiftのpodのデプロイ方法ですが、デフォルトでコンテナを再生成`Recreate`します。`Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
+OpenShiftのpodのデプロイ方法ですが、デフォルトは`Recreate`という方式でコンテナを再生成します。`Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
 
 別のデプロイ方法として`Rolling`があります。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行います。デプロイ方法を変更するにはDeploymentConfigを編集します。
 
@@ -479,6 +508,7 @@ oc edit dc <dc-name>
 ```
 
 ローリングアップデートを有効化することにより、ベーシックな無停止リリースが可能となります。
+
 
 ### ロールバック
 
@@ -500,9 +530,15 @@ oc rollback <deployment-name>
 oc deploy <dc-name> --enable-triggers
 ```
 
+
 ### 障害復旧
 
-OpenShiftはサービスへの接続を監視しており、機能不全となっているpodは自動的に再起動します。pod内のプロセスを停止したり、podを停止したりしても短時間で復旧します。
+OpenShiftはサービスへの接続を監視しており、機能不全となっているコンテナは自動的に再起動されます。pod内のプロセスを停止したり、podを削除したりしても短時間で復旧します。
+
+```
+oc delete pod <pod-name>
+oc exec -it -p <pod-name> -- kill 1
+```
 
 ### OSおよびミドルウェアのパッチ
 
@@ -548,6 +584,7 @@ ruby                                 registry.access.redhat.com/openshift3/ruby-
 # oc import-image php
 ```
 
+
 ### テンプレート作成
 
 既存のプロジェクトからテンプレートを作成するには以下のコマンドを発行します。
@@ -569,11 +606,6 @@ oc export bc,is,dc,svc --all --as-template=hello-php
     dockerImageRepository: ""
 ```
 
-### Jenkins連携
-
-残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
-
-開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
 
 ## よくある質問
 
@@ -583,6 +615,10 @@ oc export bc,is,dc,svc --all --as-template=hello-php
   - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
 - oc get allの出力が古いもので埋まって見づらいのはどうしたらいいですか？
   - 古いものの自動消去は検討中です。
+- Jenkinsが簡単に利用できるような連携機能はないのですか？
+  - 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
+  - 開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
+
 
 ## リファレンス
 
