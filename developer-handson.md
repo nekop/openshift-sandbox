@@ -11,10 +11,12 @@
   - [プロジェクト作成](#%E3%83%97%E3%83%AD%E3%82%B8%E3%82%A7%E3%82%AF%E3%83%88%E4%BD%9C%E6%88%90)
   - [アプリケーション作成](#%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E4%BD%9C%E6%88%90)
   - [ビルドの実行とアプリケーションの確認](#%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E5%AE%9F%E8%A1%8C%E3%81%A8%E3%82%A2%E3%83%97%E3%83%AA%E3%82%B1%E3%83%BC%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E7%A2%BA%E8%AA%8D)
+  - [Webコンソール](#web%E3%82%B3%E3%83%B3%E3%82%BD%E3%83%BC%E3%83%AB)
   - [各種コマンド](#%E5%90%84%E7%A8%AE%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
     - [基本的なコマンド](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E3%82%B3%E3%83%9E%E3%83%B3%E3%83%89)
     - [リソースのリスト](#%E3%83%AA%E3%82%BD%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%AA%E3%82%B9%E3%83%88)
     - [oc get allの出力](#oc-get-all%E3%81%AE%E5%87%BA%E5%8A%9B)
+  - [基本的な概念](#%E5%9F%BA%E6%9C%AC%E7%9A%84%E3%81%AA%E6%A6%82%E5%BF%B5)
   - [自動ビルドの設定](#%E8%87%AA%E5%8B%95%E3%83%93%E3%83%AB%E3%83%89%E3%81%AE%E8%A8%AD%E5%AE%9A)
   - [データベースの追加とテンプレート](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%AE%E8%BF%BD%E5%8A%A0%E3%81%A8%E3%83%86%E3%83%B3%E3%83%97%E3%83%AC%E3%83%BC%E3%83%88)
   - [データベースへの接続](#%E3%83%87%E3%83%BC%E3%82%BF%E3%83%99%E3%83%BC%E3%82%B9%E3%81%B8%E3%81%AE%E6%8E%A5%E7%B6%9A)
@@ -45,7 +47,7 @@
 - GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りに`/etc/openshift/master/ca.crt`をGitHub Enterprise側にインストールする必要があります。
 - OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれています。
   - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。
-  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip)
+  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip)
 
 ## OpenShiftとは
 
@@ -61,7 +63,7 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 2. OpenShift上でビルドを実行し、GitのソースコードからDockerイメージをビルドしてOpenShift上に配置し、実行可能な状態にします。
 3. GitHubにpushされたタイミングで自動ビルドを行うように設定します。
 4. MySQLを利用するphpアプリケーションを作成します。
-5. ログを
+5. OpenShift上で何が発生しているのか、ログやイベント、コンテナ内部を調べます。
 
 ## OpenShift Clientコマンド
 
@@ -72,7 +74,7 @@ OpenShift Clientコマンドは`oc`という単一の実行ファイルです。
 ## ログイン
 
 ```
-oc login <server>:<port>
+oc login <server>[:<port>]
 ```
 
 ログアウトを行うにはoc logoutを実行します。
@@ -112,6 +114,7 @@ gitへpushしたらOpenShift上にアプリケーションを作成します。
 oc new-app <app-name> <repository>
 oc status
 oc get all
+oc get events
 oc expose service <app-name>
 ```
 
@@ -124,8 +127,8 @@ oc expose service <app-name>
 マニュアルでソースコードからDockerイメージを生成するビルドを実行します。成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。
 
 ``
-oc start-build [name]
-oc build-logs [name]-1
+oc start-build <name>
+oc build-logs <name>-1
 ``
 
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
@@ -134,18 +137,29 @@ oc build-logs [name]-1
 http://<app-name>.<your-openshift-cloud-domain>
 ```
 
+## Webコンソール
+
+ログインにも利用したOpenShiftのmasterサーバにはWebコンソールが付属しています。デフォルトで8443ポートを利用するようになっています。ブラウザで開いてログインしてみましょう。
+
+```
+https://<server>:8443/
+```
+
+Webコンソールでは構成がグラフィカルに表示されるようになっています。後述するPodやServiceなどのオブジェクトがどのような位置付けなのかを理解するのに役立つでしょう。
+
 ## 各種コマンド
 
 ### 基本的なコマンド
 
 - `oc status`
 - `oc get all`
-- `oc get [resource]`
-- `oc describe [resource] [resource-name]`
+- `oc get events`
+- `oc get <resource>`
+- `oc describe <resource> <resource-name>`
 - `oc get all -o yaml`
-- `oc build-logs [build-name]`
-- `oc logs [pod-name]`
-- `oc delete [resource] [resource-name]`
+- `oc build-logs <build-name>`
+- `oc logs <pod-name>`
+- `oc delete <resource> <resource-name>`
 - `oc delete all --all` # プロジェクトの内容全消し
 
 ### リソースのリスト
@@ -177,9 +191,29 @@ oc get allは以下のリソースをまとめて表示します。
 - service
 - pod
 
+## 基本的な概念
+
+- Pod
+  - コンテナの入れ物。デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
+  - [k8s Pod](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/pods.md)
+- Service (se, svc)
+  - pod群のIPアドレスを保持し、podへのアクセスポイントとなるKubernetesのオブジェクト
+  - [k8s Service](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md)
+- Replication Controller (rs)
+  - podの数を管理して制御するKubernetesのオブジェクト
+  - [k8s Replication Controller](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/replication-controller.md)
+- Deployment Config (dc)
+  - デプロイ管理を行うOpenShiftのオブジェクト
+- Build Config (bc)
+  - ビルド管理を行うOpenShiftのオブジェクト
+- Image Stream (is)
+  - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)のような構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されており、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
+- Route
+  - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。
+
 ## 自動ビルドの設定
 
-`oc describe bc [name]`を実行してビルドコンフィグを参照すると、hookのURLが取得できます。このhookをGitHubのWebhookに設定したり、Webhook GenericのURLをgitのpost-updateなどのhookでcurl -X POSTで呼び出すことで自動的にビルドがトリガーされます。
+`oc describe bc <name>`を実行してビルドコンフィグを参照すると、hookのURLが取得できます。このhookをGitHubのWebhookに設定したり、Webhook GenericのURLをgitのpost-updateなどのhookでcurl -X POSTで呼び出すことで自動的にビルドがトリガーされます。
 
 ```
 $ oc describe bc hello-php
@@ -267,22 +301,29 @@ $mysqli->close();
 ビルドに失敗した場合は`oc build-logs`でビルドログを参照します。
 
 ```
-oc build-logs [build-name]
+oc build-logs <build-name>
 ```
 
 デプロイに失敗した、もしくはデプロイは成功しているが正常に動いていない、という場合は`oc logs`で対象podのログを参照します。デプロイのリトライは`oc deploy --retry`で行うことができます。
 
 ```
-oc logs [pod-name]
-oc deploy [dc-name] --retry
+oc logs <pod-name>
+oc deploy <dc-name> --retry
 ```
 
 ビルドやデプロイはnew-appの直後などはタイミングの問題により失敗したりします。その場合は少し待ってから再実行すると成功します。
 
-コンテナの内部を調べたい場合は`oc exec`を利用します。しかし、Dockerコンテナの中は通常最低限のツールのみがインストールされている状態ですので、あまりできることは多くありません。コンテナの中のファイルの確認などには便利です。
+DockerイメージのpullやDockerコンテナのステータス変更などのイベントの一覧は`oc get events`で参照できます。
 
 ```
-oc exec -it -p [pod-name] bash
+oc get events
+```
+
+コンテナの内部を調べたい場合は`oc exec`を利用します。しかし、Dockerコンテナの中は通常最低限のツールのみがインストールされている状態ですので、あまりできることは多くありません。コンテナの中のファイルの確認などには便利です。`oc exec`で実行するコマンドにオプションを渡す場合はocコマンドがそれを解釈しないようにストップオプション`--`を利用する必要があります。
+
+```
+oc exec -it -p <pod-name> bash
+oc exec -it -p <pod-name> -- command <command-opions>
 ```
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
@@ -291,13 +332,13 @@ oc exec -it -p [pod-name] bash
 
 ### チームでの開発環境、テスト環境、本番環境の管理
 
-joe, aliceそしてbenの開発者が小さなphp/mysqlプロジェクト`greenhat`でチーム開発を行います。チーム開発のセットアップは現状`oadm`コマンドを利用する必要があり、OpenShift管理者によるオペレーションが必要です。
+joe, aliceそしてbenの開発者が小さなphp/mysqlプロジェクト`hello-php`でチーム開発を行います。チーム開発のセットアップは現状`oadm`コマンドを利用する必要があり、OpenShift管理者によるオペレーションが必要です。
 
 プロジェクトを作成し、joe, aliceとbenを管理者として登録します。チームのプロジェクトなので、特に個人名などは付与しません。
 
 ```
-oadm new-project greenhat --admin="joe"
-oc project greenhat
+oadm new-project hello-php --admin="joe"
+oc project hello-php
 oadm add-role-to-user admin alice
 oadm add-role-to-user admin ben
 oc project default
@@ -306,11 +347,11 @@ oc project default
 joeがこのプロジェクトを構成していきます。もちろんaliceでもbenでもこの作業は可能です。
 
 ```
-oc new-app http://github.example.jp/greenhat/greenhat
-oc expose se greenhat
+oc new-app http://github.example.jp/hello-php/hello-php
+oc expose se hello-php
 ```
 
-この後にWebhookで自動ビルドを設定します。これでGitのgreenhatのmasterブランチである開発バージョンは`greenhat.cloudapps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
+この後にWebhookで自動ビルドを設定します。これでGitのhello-phpのmasterブランチである開発バージョンは`hello-php.cloudapps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
 
 joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上では個人のプロジェクトへ`new-app`を発行し、自動ビルドを設定します。各個人は各個人の環境で開発を行い、プロジェクトのgitリポジトリへPull Requestを送信します。
 
@@ -318,11 +359,11 @@ joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上で�
 
 #### Gitベースの管理
 
-最初はgitのブランチとして管理する方法です。testブランチを作って、そちらを新しいアプリケーションとして`test-greenhat`という名前で登録します。開発版からテスト環境へデプロイする場合はtestブランチへpushします。必要に応じてタグも付与すると良いでしょう。
+最初はgitのブランチとして管理する方法です。testブランチを作って、そちらを新しいアプリケーションとして`test-hello-php`という名前で登録します。開発版からテスト環境へデプロイする場合はtestブランチへpushします。必要に応じてタグも付与すると良いでしょう。
 
 ```
-oc new-app http://github.example.jp/greenhat/greenhat#test --name=test-greenhat
-oc expose se test-greenhat
+oc new-app http://github.example.jp/hello-php/hello-php#test --name=test-hello-php
+oc expose se test-hello-php
 ```
 
 テスト環境はテスト中などに誤って更新されても困るので、自動ビルドは設定しなくても良いでしょう。マニュアルでstart-buildします。本番環境も同じようにブランチを作成して設定します。
@@ -332,56 +373,55 @@ oc expose se test-greenhat
 テスト環境用の`test`, 本番環境用の`prod`というタグをImageStreamに作成しておきます。ImageStreamのtagは実際にはgitのブランチのように機能し、過去にタグ付けされたイメージの履歴を全て保持しています。
 
 ```
-oc tag library/greenhat:latest greenhat:test
-oc tag library/greenhat:latest greenhat:prod
+oc tag library/hello-php:latest hello-php:test
+oc tag library/hello-php:latest hello-php:prod
 ```
 
 次に、開発バージョンのDeploymentConfig, Service, Routeを複製します。ImageStreamは共用しますし、テスト環境や本番環境はビルドを行わないのでBuildConfigはありません。
 
 ```
-oc export dc greenhat -o json >> test-greenhat.json
-oc export se greenhat -o json >> test-greenhat.json
-oc export route greenhat -o json >> test-greenhat.json
+oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
 ```
 
-出力されたJSONファイルの`greenhat`を`test-greenhat`や`prod-greenhat`に置換するのですが、`ImageStreamTag`と`image`の部分に含まれる`greenhat`は置換対象から外します。
-
-`ImageStreamTag`に`greenhat:latest`が定義されていますので、`greenhat:test`, `greenhat:prod`へ変更します。
+出力されたYAMLファイルの`hello-php`を`test-hello-php`や`prod-hello-php`に置換するのですが、`ImageStreamTag`と`image`の部分に含まれる`hello-php`は置換対象から外します。
 
 ```
-{
-    "type": "ImageChange",
-    "imageChangeParams": {
-        "automatic": true,
-        "containerNames": [
-            "greenhat"
-        ],
-        "from": {
-            "kind": "ImageStreamTag",
-            "name": "greenhat:latest"
-        }
-    }
-}
+perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml         # イメージ書式を除外した"hello-php"を"test-hello-php"へ置換
+perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml # ImageStreamTagをlatestからtestに置換
+
+```
+
+`ImageStreamTag`に`hello-php:latest`が定義されていますので、`hello-php:test`, `hello-php:prod`へ変更します。
+
+```
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - hello-php
+        from:
+          kind: ImageStreamTag
+          name: hello-php:latest
+      type: ImageChange
 ```
 
 
 ここまで行なったらOpenShiftのmaster APIサーバへ流し込みます。
 
 ```
-cat test-greenhat.json | oc create -f -
+oc new-app -f test-hello-php.yaml
 ```
 
 これで準備は完了です。`test`タグが付けられたイメージが存在していないので、初回のデプロイは失敗します。
 
-`oc describe is greenhat`を実行して、適当なイメージに`test`タグを付与します。
+`oc describe is hello-php`を実行して、適当なイメージに`test`タグを付与します。
 
 ```
-oc tag greenhat@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx greenhat:test
+oc tag hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx hello-php:test
 ```
 
 タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同様にリリースできます。
 
-この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。
+この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。この例では"v3"の部分は読みやすいように書き換えてあります。実際には64ケタのsha256値です。
 
 ```
 $ oc describe is hello-php
@@ -404,6 +444,12 @@ prod    library/hello-php:latest   9 hours ago  172.30.55.101:5000/hello-php/hel
                                   25 hours ago  library/hello-php:latest
 ```
 
+いくつか空コミットを生成してpushし、新しいイメージをいくつか生成して、タグ付けを試してみましょう。gitで空コミットを作るには`git commit --allow-empty`を実行します。
+
+```
+git commit --allow-empty -m 'empty' && git push
+```
+
 ### Dockerイメージのデプロイ
 
 `oc new-app`では、ソースコードではなく一般的なDockerイメージを指定することもできます。
@@ -419,7 +465,7 @@ oc new-app openshift/jenkins-1-centos
 OpenShiftではアプリケーションコンテナを複数立ち上げることができます。接続はOpenShiftに含まれる`router`コンポーネントによって、接続数の少ないコンテナへロードバランスされます。`router`コンポーネントは[HAProxy](http://www.haproxy.org/)によって実装されており、`leastconn`ロードバランスがデフォルトで適用されるようになっています。
 
 ```
-oc scale rc [rc-name] --replicas=2
+oc scale rc <rc-name> --replicas=2
 ```
 
 負荷に応じて自動的にスケールを制御するオートスケールは将来のバージョンで実装される予定です。
@@ -429,7 +475,7 @@ OpenShiftのpodのデプロイ方法ですが、デフォルトでコンテナ�
 別のデプロイ方法として`Rolling`があります。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行います。デプロイ方法を変更するにはDeploymentConfigを編集します。
 
 ```
-oc edit dc [dc-name]
+oc edit dc <dc-name>
 ```
 
 ローリングアップデートを有効化することにより、ベーシックな無停止リリースが可能となります。
@@ -439,19 +485,19 @@ oc edit dc [dc-name]
 まずはロールバック対象となるデプロイ名を探します。
 
 ```
-oc describe dc [dc-name]
+oc describe dc <dc-name>
 ```
 
 ロールバック対象のデプロイ名を指定して`oc rollback`を発行します。発行すると、指定されたデプロメントと同じ内容の新しいデプロイメントが作成され、自動デプロイトリガーが無効化されます。
 
 ```
-oc rollback [deployment-name]
+oc rollback <deployment-name>
 ```
 
 問題が解決したあと、自動デプロイトリガーを有効化するには以下を発行します。
 
 ```
-oc deploy [dc-name] --enable-triggers
+oc deploy <dc-name> --enable-triggers
 ```
 
 ### 障害復旧
@@ -527,7 +573,7 @@ oc export bc,is,dc,svc --all --as-template=hello-php
 
 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
 
-開発版では[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
+開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
 
 ## よくある質問
 
