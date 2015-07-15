@@ -51,13 +51,13 @@
 
 ## OpenShiftとは
 
-Dockerコンテナでアプリケーションを動作させるためのPaaS (Platform as a Service)基盤です。アプリケーションをDockerコンテナ上でビルドしてDockerイメージを作成し、Dockerコンテナとして動作させることができます。
+Dockerコンテナでアプリケーションを動作させるためのPaaS (Platform as a Service)基盤です。アプリケーションをDockerコンテナ上でビルドしてDockerイメージを作成し、Dockerコンテナとして動作させることができます。Dockerコンテナのスケジューリングを行うGoogleの[Kubernetes](http://kubernetes.io/)をベースに構築されています。
 
 簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
 
 ![OpenShift marketecture](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/marketecture.jpg)
 
-OpenShiftのようにビルド済みのDockerイメージを実行環境へデプロイするモデルは現在はImmutable InfrastructureやBlue Green Deploymentの実現方法として注目を集めています。
+環境をセットアップして利用するのではなく、OpenShiftのようにビルド済みのDockerイメージをDocker実行環境へデプロイするモデルは現在はImmutable InfrastructureやBlue Green Deploymentの実現方法として注目を集めています。
 
 
 ## ハンズオンシナリオの説明
@@ -157,11 +157,10 @@ https://<server>:8443/
 
 Webコンソールでは構成がグラフィカルに表示されるようになっています。今はアプリケーションのみの単一構成なのであまり見どころはないのですが、アプリケーションのpodを増殖させたり、データベースなどを追加するとにぎやかになります。
 
-
 ## 基本的な概念
 
 - Pod
-  - コンテナの入れ物。デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
+  - コンテナの入れ物であり、デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
   - [k8s Pod](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/pods.md)
 - Service (se, svc)
   - pod群のIPアドレスを保持し、podへのアクセスポイントとなるKubernetesのオブジェクト
@@ -176,7 +175,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - Image Stream (is)
   - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)のような構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されており、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
 - Route
-  - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。
+  - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。Routeを作成すると、OpenShift外部からサービスへURLアクセス可能になる。`oc expose`コマンドで作成できる。
 
 
 ## 各種コマンド
