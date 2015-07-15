@@ -326,6 +326,13 @@ oc exec -ti -p <pod-name> bash
 mysql -h <host> -u <user> -p
 ```
 
+もしくは`oc port-forward`で自マシンと接続します。
+
+```
+oc port-forward -p <pod-name>  3306:3306
+mysql -h 127.0.0.1 -P 3306 -u user -p
+```
+
 `oc exec`でリモートのPaaSサーバ群のどこかに配置されているDockerコンテナのシェルを手元から簡単に起動できて操作できます。`oc exec`の通信にはWebSocketが利用されています。
 
 また、再度Webコンソールを開いてみてください。アプリケーションとデータベースが配置されているのが確認できます。
@@ -618,6 +625,8 @@ oc export bc,is,dc,svc --all --as-template=hello-php
 
 ## よくある質問
 
+- スクリプト言語での開発でOpenShiftを利用した場合、確認のためにgit pushが必須となり、Dockerイメージのビルドも待たなければいけないので、変更がすぐに反映されず開発スピードが落ちてしまいます。みなさんどうしているのですか？
+  - 個々の開発者がガリガリ書き換えて動かすことが必要なフェーズでは、OpenShiftを無理に利用しないほうが良いです。pushしたもの、チーム開発ブランチ、テスト環境、本番環境についてはOpenShiftを利用すれば良いでしょう。
 - アプリケーションのログはどうしたらいいですか？
   - Dockerコンテナの標準入出力は`oc logs`で参照でき、また、OpenShift上のjournaldにも集約されています。
   - クラウド環境ではfluentdなどのネットワークログサーバに送信するというのが一般的です。
@@ -655,8 +664,7 @@ oc new-app -f https://raw.githubusercontent.com/nekop/hello-php/db/hello-php.yam
 oc expose se hello-php
 oc tag library/hello-php:latest hello-php:test
 oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
-perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml         # イメージ書式を除外した"hello-php"を"test-hello-php"へ置換
-perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml # ImageStreamTagをlatestからtestに置換
-oc new-app -f test-hello-php.yaml
+perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml
+perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml
 ```
 
