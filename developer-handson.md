@@ -44,9 +44,9 @@
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
 - GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りに`/etc/openshift/master/ca.crt`をGitHub Enterprise側にインストールする必要があります。
-- OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれています。
-  - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。
-  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip)
+- OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれているので、それをOpenShift管理者が利用者へ配布します。
+  - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。bash補完ファイルを利用する場合は`/etc/bash_completion.d/oc`に配置してbashを再度開始するか、`. ~/.bash_profile`で再読み込みしてくだい。
+  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip) | [bash補完ファイル](http://people.redhat.com/tkimura/ose3/bash_completion.d/oc)
 
 
 ## OpenShiftとは
@@ -56,6 +56,8 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
 
 ![OpenShift marketecture](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/marketecture.jpg)
+
+OpenShiftのようにビルド済みのDockerイメージを実行環境へデプロイするモデルは現在はImmutable InfrastructureやBlue Green Deploymentの実現方法として注目を集めています。
 
 
 ## ハンズオンシナリオの説明
@@ -128,14 +130,15 @@ oc expose service <app-name>
 
 ## ビルドの実行とアプリケーションの確認
 
-マニュアルでソースコードからDockerイメージを生成するビルドを実行します。成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。
+マニュアルでソースコードからDockerイメージを生成するビルドを行う`oc start-build`を実行します。成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。`bc-name`は`app-name`と同一です。`build-name`は末尾に`-1`のようなシーケンス番号が付くので注意してください。
 
 ```
-oc start-build <name>
-oc build-logs <name>-1
+oc start-build <bc-name>
+oc get build
+oc build-logs <build-name>
 ```
 
-最初のビルドはnew-appを発行してから少し時間がたてば開始されます。手動でビルドを発行したのと合わせて2つビルドが同時に走ると片方がDockerイメージのpushに失敗することがありますが気にしないでください。
+最初のビルドは`oc new-app`を発行してから少し時間がたてば開始されます。手動でビルドを発行したのと合わせて2つビルドが同時に走ると片方がDockerイメージのpushに失敗することがありますが気にしないでください。
 
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
@@ -320,10 +323,12 @@ $mysqli->close();
 oc get pod
 oc describe pod <pod-name> # IP取得
 oc exec -ti -p <pod-name> bash
-mysql -h <host> -u <user> -p <password>
+mysql -h <host> -u <user> -p
 ```
 
-再度Webコンソールを開いてみてください。アプリケーションとデータベースが配置されているのが確認できます。
+`oc exec`でリモートのPaaSサーバ群のどこかに配置されているDockerコンテナのシェルを手元から簡単に起動できて操作できます。`oc exec`の通信にはWebSocketが利用されています。
+
+また、再度Webコンソールを開いてみてください。アプリケーションとデータベースが配置されているのが確認できます。
 
 
 ## トラブルシューティング
@@ -341,7 +346,13 @@ oc logs <pod-name>
 oc deploy <dc-name> --retry
 ```
 
-ビルドやデプロイはnew-appの直後などはタイミングの問題により失敗したりします。その場合は少し待ってから再実行すると成功します。
+phpのpodではApache httpdが動作しており、`oc logs`でログを参照するとサーバ名の設定がされていないため以下の警告メッセージが見えますが無視してかまいません。OpenShift上では不要なものです。
+
+```
+AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 10.x.x.x. Set the 'ServerName' directive globally to suppress this message
+```
+
+ビルドやデプロイは`new-app`の直後などはタイミングの問題により失敗したりします。その場合は少し待ってから再実行すると成功します。
 
 DockerイメージのpullやDockerコンテナのステータス変更などのイベントの一覧は`oc get events`で参照できます。
 
@@ -403,8 +414,7 @@ oc expose se test-hello-php
 
 こちらの方法ではDockerイメージの開発版をテスト環境、そして本番環境へ昇格させるというDockerイメージベースのリリースを行うモデルです。
 
-![OpenShift Image Promotion](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/imagepromotion.png)
-
+![OpenShift Image Promotion](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/image-promotion.jpg)
 
 テスト環境用の`test`, 本番環境用の`prod`というタグをImageStreamに作成しておきます。ImageStreamのtagは実際にはgitのブランチのように機能し、過去にタグ付けされたイメージの履歴を全て保持しています。
 
@@ -413,7 +423,7 @@ oc tag library/hello-php:latest hello-php:test
 oc tag library/hello-php:latest hello-php:prod
 ```
 
-次に、開発バージョンのDeploymentConfig, Service, Routeを複製します。ImageStreamは共用しますし、テスト環境や本番環境はビルドを行わないのでBuildConfigはありません。
+次に、開発バージョンのDeploymentConfig, Service, Routeを複製してリネームします。ImageStreamは共用しますし、テスト環境や本番環境はビルドを行わないのでBuildConfigはありません。
 
 ```
 oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
@@ -424,10 +434,9 @@ oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yam
 ```
 perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml         # イメージ書式を除外した"hello-php"を"test-hello-php"へ置換
 perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml # ImageStreamTagをlatestからtestに置換
-
 ```
 
-`ImageStreamTag`に`hello-php:latest`が定義されていますので、`hello-php:test`, `hello-php:prod`へ変更します。
+スクリプトなどを利用せずマニュアルで変更を行う場合、以下のように`ImageStreamTag`に`hello-php:latest`が定義されていますので、`hello-php:test`, `hello-php:prod`へ変更します。
 
 ```
     - imageChangeParams:
@@ -613,14 +622,41 @@ oc export bc,is,dc,svc --all --as-template=hello-php
   - Dockerコンテナの標準入出力は`oc logs`で参照でき、また、OpenShift上のjournaldにも集約されています。
   - クラウド環境ではfluentdなどのネットワークログサーバに送信するというのが一般的です。
   - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
-- oc get allの出力が古いもので埋まって見づらいのはどうしたらいいですか？
-  - 古いものの自動消去は検討中です。
+- `oc get all`の出力が古いもので埋まって見づらいのはどうしたらいいですか？
+  - 古いものの自動消去は検討中です。後続のリリースにご期待ください。
 - Jenkinsが簡単に利用できるような連携機能はないのですか？
   - 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
   - 開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
-
+- カスタマイズはできますか？
+  - はい、OpenShiftのほぼ全てがAPIで構成され、プログラマグブルになっています。ocコマンドもWebコンソールも基本的にはAPIを叩いているだけのAPIクライアント実装です。
+  - OSやミドルウェアイメージをカスタマイズしたい場合は[カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.0/creating_images/s2i.html)します。
+  - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.0/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
 
 ## リファレンス
 
 - [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.0/welcome/index.html)
+
+## コマンドコピーのためのチートセクション
+
+```
+oc login
+oc new-project tkimura-hello-php
+oc new-app https://github.com/nekop/hello-php
+oc expose se hello-php
+oc start-build hello-php --follow
+oc build-logs hello-php-1
+oc describe bc hello-php
+oc describe dc hello-php
+oc describe is hello-php
+oc new-app --template=mysql-ephemeral --param=DATABASE_SERVICE_NAME=hello-php-mysql,MYSQL_DATABASE=hello,MYSQL_USER=user,MYSQL_PASSWORD=pass
+oc env dc hello-php MYSQL_USER=user MYSQL_PASSWORD=pass MYSQL_DATABASE=hello
+
+oc new-app -f https://raw.githubusercontent.com/nekop/hello-php/db/hello-php.yaml
+oc expose se hello-php
+oc tag library/hello-php:latest hello-php:test
+oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
+perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml         # イメージ書式を除外した"hello-php"を"test-hello-php"へ置換
+perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml # ImageStreamTagをlatestからtestに置換
+oc new-app -f test-hello-php.yaml
+```
 
