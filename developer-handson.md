@@ -640,9 +640,12 @@ oc export bc,is,dc,svc --all --as-template=hello-php
   - OSやミドルウェアイメージをカスタマイズしたい場合は[カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.0/creating_images/s2i.html)します。
   - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.0/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
 
+
 ## リファレンス
 
 - [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.0/welcome/index.html)
+- [英語ブログ](https://blog.openshift.com/)
+
 
 ## コマンドコピーのためのチートセクション
 
