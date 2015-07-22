@@ -104,7 +104,7 @@ oc new-project <project-name>
 まずはgithubにリポジトリを作成し、cloneしてください。
 
 ```
-git clone <repository>
+git clone <git clone URL>
 ```
 
 cloneが完了したら、最初のお約束であるHello Worldを配置します。
@@ -116,10 +116,10 @@ git commit -m 'Hello world'
 git push
 ```
 
-gitへpushしたらOpenShift上にアプリケーションを作成します。
+gitへpushしたらOpenShift上にアプリケーションを作成します。この`oc new-app`ではOpenShiftがgitのcloneを発行するため、sshなどの認証が必要なclone URLは利用しないでください。一般的にはhttpsのURLが認証なしのclone URLとなることが多いでしょう。
 
 ```
-oc new-app <repository>
+oc new-app <git public clone URL>
 oc expose service <app-name>
 ```
 
@@ -143,8 +143,10 @@ oc build-logs <build-name>
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
 ```
-http://<app-name>.<your-openshift-cloud-domain>
+http://`<app-name>.<project-name>.<cloud-domain>`
 ```
+
+`oc expose`を行うと、アプリケーションへアクセスするためのルーティング情報が生成されます。デフォルトでは`<app-name>.<project-name>.<cloud-domain>`という形式のURLとなります。`--hostname`オプションで任意のURLに変更できるので、DNS設定と合わせて任意のURLへのリクエストをOpenShiftでハンドルすることができます。
 
 
 ## Webコンソール
