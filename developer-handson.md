@@ -638,7 +638,7 @@ oc export bc,is,dc,svc --all --as-template=hello-php
   - 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
   - 開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
 - カスタマイズはできますか？
-  - はい、OpenShiftのほぼ全てがAPIで構成され、プログラマグブルになっています。ocコマンドもWebコンソールも基本的にはAPIを叩いているだけのAPIクライアント実装です。
+  - はい、OpenShiftのほぼ全てがAPIで構成され、プログラマブルになっています。ocコマンドもWebコンソールも基本的にはAPIを叩いているだけのAPIクライアント実装です。
   - ビルドされるイメージをカスタマイズしたい場合は、[`.sti/bin`ディレクトリにカスタムの`assemble`, `run`スクリプトを含めるか、カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.0/creating_images/s2i.html)します。
   - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.0/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
 
