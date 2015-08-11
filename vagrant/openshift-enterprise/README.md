@@ -65,7 +65,11 @@ node02.cloud,192.168.232.202,192.168.232.202,node02.cloud,node02.cloud
   - Because it doesn't perform tasks in parallel so it's slow. Especially RHSM and yum update.
 - Vagrant/VirtualBox?
   - Not supported yet, pull request welcome.
+- Is it good idea to use NetworkManager dns=dnsmasq feature on libvirt host in order to access the router with app domain?
+  - Major drawback, it breaks docker on the libvirt host because docker will have same /etc/resolv.conf `nameserver 127.0.0.1` entry and cannot resolve DNS inside containers
 - `.cloud` domain revoled to `127.0.53.53` and routed to localhost
   - It's a conflict domain, see https://www.icann.org/news/announcement-2-2014-08-01-en
-  - This is a hack. You can port forward 127.0.53.53 to openshift router node and access to `*.apps.cloud`, without DNS setting
+  - This is a hack for app domain. Since the `*.apps.cloud` automagically resolved to `127.0.53.53`, you can port forward it to openshift router node so no need to modify /etc/resolv.conf outside the OpenShift.
   - ssh -fNL 127.0.53.53:8080:192.168.232.101:80 vagrant@192.168.232.101
+- How to change the domain name?
+  - grep `.cloud` and modify them.
