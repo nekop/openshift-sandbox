@@ -1,6 +1,8 @@
 FROM registry.access.redhat.com/rhel7:latest
 MAINTAINER Takayoshi Kimura <tkimura@redhat.com>
-RUN cat /etc/resolv.conf
+RUN yum repolist --disablerepo=* && \
+    yum-config-manager --disable \* > /dev/null && \
+    yum-config-manager --enable rhel-7-server-rpms > /dev/null
 RUN yum install -y tar && \
     yum clean all
 RUN cd /opt && \
