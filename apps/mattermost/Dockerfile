@@ -1,5 +1,6 @@
 FROM registry.access.redhat.com/rhel7:latest
 MAINTAINER Takayoshi Kimura <tkimura@redhat.com>
+RUN cat /etc/resolv.conf
 RUN yum install -y tar && \
     yum clean all
 RUN cd /opt && \
