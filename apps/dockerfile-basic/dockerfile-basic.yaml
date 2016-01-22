@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: dockerfile-basic
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: dockerfile-basic
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: dockerfile-basic:latest
+    source:
+      contextDir: apps/dockerfile-basic
+      git:
+        uri: https://github.com/nekop/openshift-sandbox
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: rhel-tools:latest
+      type: Docker
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: dockerfile-basic
+  spec:
+    selector:
+      name: dockerfile-basic
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          name: dockerfile-basic
+      spec:
+        containers:
+        - image: dockerfile-basic
+          imagePullPolicy: Always
+          name: dockerfile-basic
+          ports:
+          - containerPort: 2000
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - dockerfile-basic
+        from:
+          kind: ImageStreamTag
+          name: dockerfile-basic:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: dockerfile-basic
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rhel-tools
+  spec:
+    dockerImageRepository: registry.access.redhat.com/rhel7/rhel-tools
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: dockerfile-basic
+  spec:
+    ports:
+    - name: 2000-tcp
+      port: 2000
+      protocol: TCP
+      targetPort: 2000
+    selector:
+      deploymentconfig: dockerfile-basic
