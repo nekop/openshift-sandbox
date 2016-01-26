@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: pv-basic
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: pv-basic
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: pv-basic:latest
+    source:
+      contextDir: apps/pv-basic
+      git:
+        uri: https://github.com/nekop/openshift-sandbox
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: rhel-tools:latest
+      type: Docker
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    name: pv-basic
+  spec:
+    selector:
+      name: pv-basic
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          name: pv-basic
+      spec:
+        containers:
+        - image: pv-basic
+          imagePullPolicy: Always
+          name: pv-basic
+          ports:
+          - containerPort: 2000
+          volumeMounts:
+          - mountPath: /pv
+            name: pv-basic
+        volumes:
+        - name: pv-basic
+          persistentVolumeClaim:
+            claimName: pv-basic
+    triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+        - pv-basic
+        from:
+          kind: ImageStreamTag
+          name: pv-basic:latest
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: pv-basic
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: rhel-tools
+  spec:
+    dockerImageRepository: registry.access.redhat.com/rhel7/rhel-tools
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: pv-basic
+  spec:
+    ports:
+    - name: 2000-tcp
+      port: 2000
+      protocol: TCP
+      targetPort: 2000
+    selector:
+      deploymentconfig: pv-basic
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: pv-basic
+  spec:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: 16Mi
