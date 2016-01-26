@@ -36,6 +36,9 @@ objects:
       name: dockerfile-basic
     replicas: 1
     template:
+      metadata:
+        labels:
+          name: dockerfile-basic
       spec:
         containers:
         - image: dockerfile-basic
