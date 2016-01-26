@@ -6,14 +6,14 @@ objects:
 - apiVersion: v1
   kind: BuildConfig
   metadata:
-    name: pv-basic
+    name: ${APPLICATION_NAME}
   spec:
     output:
       to:
         kind: ImageStreamTag
-        name: pv-basic:latest
+        name: ${APPLICATION_NAME}:latest
     source:
-      contextDir: apps/pv-basic
+      contextDir: apps/dockerfile-basic
       git:
         uri: https://github.com/nekop/openshift-sandbox
       type: Git
@@ -30,43 +30,43 @@ objects:
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
-    name: pv-basic
+    name: ${APPLICATION_NAME}
   spec:
     selector:
-      name: pv-basic
+      name: ${APPLICATION_NAME}
     replicas: 1
     template:
       metadata:
         labels:
-          name: pv-basic
+          name: ${APPLICATION_NAME}
       spec:
         containers:
-        - image: pv-basic
+        - image: ${APPLICATION_NAME}
           imagePullPolicy: Always
-          name: pv-basic
+          name: ${APPLICATION_NAME}
           ports:
           - containerPort: 2000
           volumeMounts:
           - mountPath: /pv
-            name: pv-basic
+            name: ${APPLICATION_NAME}
         volumes:
-        - name: pv-basic
+        - name: ${APPLICATION_NAME}
           persistentVolumeClaim:
-            claimName: pv-basic
+            claimName: ${APPLICATION_NAME}
     triggers:
     - imageChangeParams:
         automatic: true
         containerNames:
-        - pv-basic
+        - ${APPLICATION_NAME}
         from:
           kind: ImageStreamTag
-          name: pv-basic:latest
+          name: ${APPLICATION_NAME}:latest
       type: ImageChange
     - type: ConfigChange
 - apiVersion: v1
   kind: ImageStream
   metadata:
-    name: pv-basic
+    name: ${APPLICATION_NAME}
 - apiVersion: v1
   kind: ImageStream
   metadata:
@@ -76,7 +76,7 @@ objects:
 - apiVersion: v1
   kind: Service
   metadata:
-    name: pv-basic
+    name: ${APPLICATION_NAME}
   spec:
     ports:
     - name: 2000-tcp
@@ -84,14 +84,18 @@ objects:
       protocol: TCP
       targetPort: 2000
     selector:
-      deploymentconfig: pv-basic
+      deploymentconfig: ${APPLICATION_NAME}
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    name: pv-basic
+    name: ${APPLICATION_NAME}
   spec:
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
         storage: 16Mi
+parameters:
+- name: APPLICATION_NAME
+  required: true
+  value: pv-basic
