@@ -13,7 +13,7 @@ objects:
         kind: ImageStreamTag
         name: ${APPLICATION_NAME}:latest
     source:
-      contextDir: apps/dockerfile-basic
+      contextDir: apps/pv-basic
       git:
         uri: https://github.com/nekop/openshift-sandbox
       type: Git
