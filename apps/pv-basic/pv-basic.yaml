@@ -91,6 +91,7 @@ objects:
     name: ${APPLICATION_NAME}
   spec:
     accessModes:
+    - ReadWriteMany
     - ReadWriteOnce
     resources:
       requests:
