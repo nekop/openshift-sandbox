@@ -5,9 +5,9 @@ if [ ! -f /opt/mattermost/config/config.json.orig ]; then
   cp -a /opt/mattermost/config/config.json /opt/mattermost/config/config.json.orig
 fi
 
-if [[ ! -z "$DRIVER_NAME" && ! -z "$DATA_SOURCE" ]]; then
+if [ "$DRIVER_NAME" = "mysql" ]; then
     sed -e 's#"DriverName": "mysql"#"DriverName": "'"$DRIVER_NAME"'"#' \
-        -e 's#"DataSource": "mmuser:mostest@tcp(mysql:3306)/mattermost_test?charset=utf8mb4,utf8"#"DataSource": "'"$DATA_SOURCE"'"#' \
+        -e 's#"DataSource": "mmuser:mostest@tcp(mysql:3306)/mattermost_test?charset=utf8mb4,utf8"#"DataSource": "'"$MYSQL_USER:$MYSQL_PASSWORD@tcp($MYSQL_SERVICE_HOST:$MYSQL_SERVICE_PORT)/$MYSQL_DATABASE?charset=utf8mb4,utf8"'"#' \
         /opt/mattermost/config/config.json.orig > /opt/mattermost/config/config.json
     grep DataSource /opt/mattermost/config/config.json
 fi
