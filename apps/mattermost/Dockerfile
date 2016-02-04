@@ -5,7 +5,7 @@ RUN yum-config-manager --disable \* > /dev/null && \
 RUN yum install -y tar && \
     yum clean all
 RUN cd /opt && \
-    curl -LO https://github.com/mattermost/platform/releases/download/v1.3.0/mattermost.tar.gz && \
+    curl -LO https://github.com/mattermost/platform/releases/download/v1.4.0/mattermost.tar.gz && \
     tar xf mattermost.tar.gz &&\
     rm mattermost.tar.gz && \
     chmod -R 777 /opt/mattermost
