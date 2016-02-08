@@ -1,4 +1,4 @@
-# Mattermost for OpenShift v3
+# Mattermost for OpenShift Enterprise v3
 
 This is instant mattermost application for OpenShift Enterprise v3.
 
