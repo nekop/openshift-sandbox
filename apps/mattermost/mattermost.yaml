@@ -49,6 +49,8 @@ objects:
           env:
           - name: DRIVER_NAME
             value: mysql
+          - name: DATABASE_SERVICE_NAME
+            value: ${DATABASE_SERVICE_NAME}
           - name: MYSQL_USER
             value: ${MYSQL_USER}
           - name: MYSQL_PASSWORD
