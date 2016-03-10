@@ -1,7 +1,7 @@
 #!/bin/bash
 
 oc project default
-for i in $(seq 1 10); do
+for i in $(seq 1 50); do
     PV=$(cat <<EOF
 apiVersion: v1
 kind: PersistentVolume
