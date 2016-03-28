@@ -22,7 +22,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: rhel:latest
-      type: Docker
+      type: Docker2
     triggers:
     - type: ConfigChange
     - imageChange: {}
@@ -57,6 +57,8 @@ objects:
             value: ${MYSQL_PASSWORD}
           - name: MYSQL_DATABASE
             value: ${MYSQL_DATABASE}
+          - name: MYSQL_URL
+            value: mysql://${MYSQL_SERVICE_HOST}:${MYSQL_SERVICE_PORT}/${MYSQL_DATABASE}
     triggers:
     - imageChangeParams:
         automatic: true
