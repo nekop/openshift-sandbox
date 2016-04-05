@@ -40,13 +40,14 @@
 
 ## 準備
 
-- このハンズオンの実行には構築済みのOpenShift Enterprise v3環境が必要です。Persistent Volumeは利用していません。
+- このハンズオンの実行には構築済みのOpenShift Enterprise 3.1.1環境が必要です。Persistent Volumeは利用していません。
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
+- GitHubとの連携を行うためには、OpenShift EnterpriseとGitHubのネットワークが相互通信可能である必要があります。つまり、インターネット上に構築されている必要があります。
 - GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りに`/etc/openshift/master/ca.crt`をGitHub Enterprise側にインストールする必要があります。
-- OpenShiftクライアントバイナリであるocコマンドはopenshift-clientsパッケージに含まれているので、それをOpenShift管理者が利用者へ配布します。
+- OpenShiftクライアントバイナリであるocコマンドはatomic-openshift-clients-redistributableパッケージに含まれているので、それをOpenShift管理者が利用者へ配布します。
   - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。bash補完ファイルを利用する場合は`/etc/bash_completion.d/oc`に配置してbashを再度開始するか、`. ~/.bash_profile`で再読み込みしてくだい。
-  - [Mac OS X](http://people.redhat.com/tkimura/ose3/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose3/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose3/windows/oc.zip) | [bash補完ファイル](http://people.redhat.com/tkimura/ose3/bash_completion.d/oc)
+  - [Mac OS X](http://people.redhat.com/tkimura/ose-3.1/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose-3.1/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose-3.1/windows/oc.zip) | [bash補完ファイル](http://people.redhat.com/tkimura/ose-3.1/bash_completion.d/oc)
 
 
 ## OpenShiftとは
@@ -55,7 +56,7 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
 
-![OpenShift marketecture](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/marketecture.jpg)
+![OpenShift Overview](https://raw.githubusercontent.com/nekop/openshift-sandbox/master/oepnshift-overview.png)
 
 環境をセットアップして利用するのではなく、OpenShiftのようにビルド済みのDockerイメージをDocker実行環境へデプロイするモデルは現在はImmutable InfrastructureやBlue Green Deploymentの実現方法として注目を集めています。
 
@@ -72,7 +73,7 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 ## OpenShift Clientコマンド
 
-OpenShift Clientコマンドは`oc`という単一の実行ファイルです。OpenShift Enterpriseのopenshift-clientsパッケージに含まれているので、管理者の方がどこかのWebサーバなどに配置して利用者にダウンロードできるようにしてください。
+OpenShift Clientコマンドは`oc`という単一の実行ファイルです。OpenShift Enterpriseのatomic-openshift-clients-redistributableパッケージに含まれているので、管理者の方がどこかのWebサーバなどに配置して利用者にダウンロードできるようにしてください。
 
 また、利用者ではなく管理者が利用するコマンド`oadm`というコマンドもあります。マニュアルなどに`oadm`コマンド例が出てきた場合は、管理者作業を意味します。
 
@@ -87,7 +88,7 @@ oc login <server>[:<port>]
 
 ログイン状態などのOpenShift関連の情報は`~/.kube/config`に保存されており、`oc config view`で同一の内容が確認できます。
 
-TLS接続には`--certificate-authority`オプションに対応するca.crtを指定するか、無指定の場合insecureのまま接続するかどうかの選択肢が出ますので、内部テスト利用などではca指定せずinsecure接続を選択しても良いでしょう。
+TLS接続には`--certificate-authority`オプションに対応するca.crtを指定するか、無指定の場合insecureのまま接続するかどうかの選択肢が出ます。内部テスト利用などではinsecure接続を選択しても良いでしょう。
 
 
 ## プロジェクト作成
@@ -116,16 +117,16 @@ git commit -m 'Hello world'
 git push
 ```
 
-gitへpushしたらOpenShift上にアプリケーションを作成します。この`oc new-app`ではOpenShiftがgitのcloneを発行するため、sshなどの認証が必要なclone URLは利用しないでください。一般的にはhttpsのURLが認証なしのclone URLとなることが多いでしょう。
+gitへpushしたらOpenShift上にアプリケーションを作成します。この`oc new-app`ではOpenShiftがgitのcloneを発行するため、sshなどの認証が必要なclone URLは利用しないでください。一般的にはhttpsのURLが認証なしのclone URLとなることが多いでしょう。認証も可能ですがこのハンズオンのスコープには含めていません。
 
 ```
 oc new-app <git public clone URL>
 oc expose service <app-name>
 ```
 
-`oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.0/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
+`oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.1/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
 
-`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, seという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
+`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, svcという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
 
 
 ## ビルドの実行とアプリケーションの確認
@@ -164,7 +165,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - Pod
   - コンテナの入れ物であり、デプロイするユニットとなるKubernetesのオブジェクト。OpenShift上ではアプリケーションやMySQLなどのコンテナがそれぞれpodになる。
   - [k8s Pod](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/pods.md)
-- Service (se, svc)
+- Service (svc)
   - pod群のIPアドレスを保持し、podへのアクセスポイントとなるKubernetesのオブジェクト
   - [k8s Service](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/services.md)
 - Replication Controller (rs)
@@ -175,7 +176,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - Build Config (bc)
   - ビルド管理を行うOpenShiftのオブジェクト
 - Image Stream (is)
-  - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)のような構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されており、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
+  - イメージ管理を行うOpenShiftのオブジェクト。タグはそれぞれ追記専用リスト(Stream)構造になっており、イメージの履歴を参照できる。イメージは実際にはDocker Registryに保存されているので、Image Streamはイメージを保持しているわけではなくイメージを参照するための情報のみを保持している。
 - Route
   - ルーター設定を行うOpenShiftのオブジェクト。OpenShiftのHAProxyルーターコンポーネントの設定情報を保持する。Routeを作成すると、OpenShift外部からサービスへURLアクセス可能になる。`oc expose`コマンドで作成できる。
 
@@ -192,6 +193,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - `oc get all -o yaml`
 - `oc build-logs <build-name>`
 - `oc logs <pod-name>`
+- `oc rsh <pod-name>`
 - `oc delete <resource> <resource-name>`
 - `oc delete all --all` # プロジェクトの内容全消し
 
@@ -204,7 +206,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - pod
 - build
 - route
-- service, se
+- service, svc
 - buildconfig, bc
 - deploymentconfig, dc
 - replicationcontroller, rc
@@ -213,7 +215,7 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 
 ### oc get allの出力
 
-oc get allは以下のリソースをまとめて表示します。
+`oc get all`は以下のリソースをまとめて表示します。
 
 - buildconfig
 - build
@@ -263,16 +265,16 @@ OpenShiftはhookからブランチ名などを取得し、ビルド要否を判�
 
 ## データベースの追加とテンプレート
 
-データベースなどの追加ソフトウェアなどはテンプレートという機構で管理します。今回はmysql-ephemeralというテンプレートを利用します。
+データベースなどの追加ソフトウェアなどはテンプレートという機構で管理します。今回は`mysql-ephemeral`というテンプレートを利用します。
 
-全ユーザが利用できるテンプレートはopenshiftプロジェクトに定義されています。以下のコマンドでテンプレートの一覧と、各テンプレートの情報を取得できます。
+全ユーザが利用できるテンプレートは`openshift`プロジェクトに定義されています。以下のコマンドでテンプレートの一覧と、各テンプレートの情報を取得できます。
 
 ```
 oc get template -n openshift
 oc describe template mysql-ephemeral -n openshift
 ```
 
-テンプレートから実際にオブジェクトを生成するには`oc new-app`コマンドを利用します。`oc new-app`コマンドは表向きの概念としてはアプリケーションを作る、というものでありコマンド名もそのようになっていますが、実際にはアプリケーションに必要なオブジェクトを生成するコマンドです。
+テンプレートから実際にオブジェクトを生成するには`oc new-app`コマンドを利用します。`oc new-app`コマンドは表向きの概念としてはアプリケーションを作る、というものでありコマンド名もそのようになっていますが、実際にはアプリケーションに必要なオブジェクト群を生成するコマンドです。
 
 MySQLはデータベース名やユーザ名にハイフンは利用できないので注意してください。もし入力してしまってMySQLが起動しない場合は`oc edit dc hello-php-mysql`で修正でき、DeploymentConfigの変更トリガーはデフォルトで有効になっているので自動で再デプロイされます。
 
@@ -323,7 +325,7 @@ $mysqli->close();
 ```
 oc get pod
 oc describe pod <pod-name> # IP取得
-oc exec -ti -p <pod-name> bash
+oc rsh <pod-name>
 mysql -h <host> -u <user> -p
 ```
 
@@ -334,17 +336,17 @@ oc port-forward -p <pod-name>  3306:3306
 mysql -h 127.0.0.1 -P 3306 -u user -p
 ```
 
-`oc exec`でリモートのPaaSサーバ群のどこかに配置されているDockerコンテナのシェルを手元から簡単に起動できて操作できます。`oc exec`の通信にはWebSocketが利用されています。
+`oc rsh`でリモートのPaaSサーバ群のどこかに配置されているDockerコンテナのシェルを手元から簡単に起動できて操作できます。`oc rsh`の通信にはWebSocketが利用されています。
 
 また、再度Webコンソールを開いてみてください。アプリケーションとデータベースが配置されているのが確認できます。
 
 
 ## トラブルシューティング
 
-ビルドに失敗した場合は`oc build-logs`でビルドログを参照します。
+ビルドに失敗した場合は`oc logs`でビルドPodのログを参照します。
 
 ```
-oc build-logs <build-name>
+oc logs <build-pod-name>
 ```
 
 デプロイに失敗した、もしくはデプロイは成功しているが正常に動いていない、という場合は`oc logs`で対象podのログを参照します。デプロイのリトライは`oc deploy --retry`で行うことができます。
@@ -368,11 +370,10 @@ DockerイメージのpullやDockerコンテナのステータス変更などの�
 oc get events
 ```
 
-コンテナの内部を調べたい場合は`oc exec`を利用します。しかし、Dockerコンテナの中は通常最低限のツールのみがインストールされている状態ですので、あまりできることは多くありません。コンテナの中のファイルの確認などには便利です。`oc exec`で実行するコマンドにオプションを渡す場合はocコマンドがそれを解釈しないようにストップオプション`--`を利用する必要があります。
+コンテナの内部を調べたい場合は`oc rsh`を利用します。しかし、Dockerコンテナの中は通常最低限のツールのみがインストールされている状態ですので、あまりできることは多くありません。コンテナの中のファイルの確認などには便利です。
 
 ```
-oc exec -it -p <pod-name> bash
-oc exec -it -p <pod-name> -- command <command-opions>
+oc rsh <pod-name>
 ```
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
@@ -382,115 +383,86 @@ oc exec -it -p <pod-name> -- command <command-opions>
 
 ### チームでの開発環境、テスト環境、本番環境の管理
 
-joe, aliceそしてbenの開発者が小さなphp/mysqlプロジェクト`hello-php`でチーム開発を行います。チーム開発のセットアップは現状`oadm`コマンドを利用する必要があり、OpenShift管理者によるオペレーションが必要です。
-
-プロジェクトを作成し、joe, aliceとbenを管理者として登録します。チームのプロジェクトなので、特に個人名などは付与しません。
+joe, aliceそしてbenの開発者が小さなphp/mysqlプロジェクト`hello-php`でチーム開発を行います。joeがプロジェクトを作成し、aliceとbenを管理者として登録します。チームのプロジェクトなので、特に個人名などは付与しません。
 
 ```
-oadm new-project hello-php --admin="joe"
-oc project hello-php
-oadm add-role-to-user admin alice
-oadm add-role-to-user admin ben
-oc project default
+oc new-project hello"
+oc project hello
+oc policy add-role-to-user admin alice
+oc policy add-role-to-user admin ben
 ```
 
 joeがこのプロジェクトを構成していきます。もちろんaliceでもbenでもこの作業は可能です。
 
 ```
 oc new-app http://github.example.jp/hello-php/hello-php
-oc expose se hello-php
+oc expose svc hello-php --hostname=hello.apps.example.jp
 ```
 
-この後にWebhookで自動ビルドを設定します。これでGitのhello-phpのmasterブランチである開発バージョンは`hello-php.cloudapps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
+この後にWebhookで自動ビルドを設定します。これでGitのhello-phpのmasterブランチである開発バージョンは`hello-php.apps.example.jp`で常にビルドされて公開される状態になりました。masterブランチにpull requestがマージされて更新されるたびに開発バージョンがアップデートされて自動デプロイされます。
 
 joe, alice, ben各個人はこのリポジトリをforkして、OpenShift上では個人のプロジェクトへ`new-app`を発行し、自動ビルドを設定します。各個人は各個人の環境で開発を行い、プロジェクトのgitリポジトリへPull Requestを送信します。
 
-続いてテスト環境と本番環境を作成します。別環境へのリリースはgitベースとDockerイメージベースの2つのアプローチがあります。
-
-#### Gitベースの管理
-
-最初はgitのブランチとして管理する方法です。testブランチを作って、そちらを新しいアプリケーションとして`test-hello-php`という名前で登録します。開発版からテスト環境へデプロイする場合はtestブランチへpushします。必要に応じてタグも付与すると良いでしょう。
-
-```
-oc new-app http://github.example.jp/hello-php/hello-php#test --name=test-hello-php
-oc expose se test-hello-php
-```
-
-テスト環境はテスト中などに誤って更新されても困るので、自動ビルドは設定しなくても良いでしょう。マニュアルでstart-buildします。本番環境も同じようにブランチを作成して設定します。
-
-#### Dockerイメージベースの管理
-
-こちらの方法ではDockerイメージの開発版をテスト環境、そして本番環境へ昇格させるというDockerイメージベースのリリースを行うモデルです。
+続いて本番環境を作成します。同じ手順でテスト環境、ステージング環境などを定義でき、開発環境から本番環境まで順次イメージをプロモーションするようなワークフローが作成できます。
 
 ![OpenShift Image Promotion](https://raw.githubusercontent.com/nekop/openshift-sandbox/wip/image-promotion.jpg)
 
-テスト環境用の`test`, 本番環境用の`prod`というタグをImageStreamに作成しておきます。ImageStreamのtagは実際にはgitのブランチのように機能し、過去にタグ付けされたイメージの履歴を全て保持しています。
+環境のコピーは開発バージョンのDeploymentConfig, Serviceをexportして利用します。本番環境はビルドを行わないのでBuildConfigはありません。
 
 ```
-oc tag library/hello-php:latest hello-php:test
-oc tag library/hello-php:latest hello-php:prod
+oc export dc,svc -o yaml --as-template=hello > prod-hello.yaml
 ```
 
-次に、開発バージョンのDeploymentConfig, Service, Routeを複製してリネームします。ImageStreamは共用しますし、テスト環境や本番環境はビルドを行わないのでBuildConfigはありません。
+出力されたYAMLファイルの中に定義されている、デプロイするイメージのタグをlatestではなくprodへ変更します。
 
 ```
-oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
+perl -i -pe 's/name: hello-php:latest/name: hello-php:prod/g' prod-hello.yaml
 ```
 
-出力されたYAMLファイルの`hello-php`を`test-hello-php`や`prod-hello-php`に置換するのですが、`ImageStreamTag`と`image`の部分に含まれる`hello-php`は置換対象から外します。
+本番環境用prod-helloプロジェクトを作成し、helloプロジェクトからイメージをpullできるよう権限を付与してnew-appでオブジェクトを生成します。
 
 ```
-perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml         # イメージ書式を除外した"hello-php"を"test-hello-php"へ置換
-perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml # ImageStreamTagをlatestからtestに置換
+oc new-project prod-hello
+oc policy add-role-to-user system:image-puller system:serviceaccount:prod-hello:default -n hello
+oc new-app -f prod-hello.yaml
+oc expose svc hello-php --hostname=prod-hello.apps.example.jp
 ```
 
-スクリプトなどを利用せずマニュアルで変更を行う場合、以下のように`ImageStreamTag`に`hello-php:latest`が定義されていますので、`hello-php:test`, `hello-php:prod`へ変更します。
+`oc describe is hello-php -n hello`を実行して、本番環境の`prod`タグを開発環境の適当なイメージに付与します。
 
 ```
-    - imageChangeParams:
-        automatic: true
-        containerNames:
-        - hello-php
-        from:
-          kind: ImageStreamTag
-          name: hello-php:latest
-      type: ImageChange
+oc tag hello/hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx hello-php:prod
 ```
 
-これで準備ができたので、new-appでオブジェクトを生成します。`test`タグが付けられたイメージをデプロイする設定ですが、そのようなイメージが存在していないので、初回のデプロイは失敗します。
+タグ付けを行うとデプロイが実行され、イメージは本番環境へとリリースされることになります。
+
+この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv5、prodはv4がデプロイされています。この例では"v4"などの部分は読みやすいように書き換えてありますが、実際には64ケタのsha256値です。
 
 ```
-oc new-app -f test-hello-php.yaml
-```
-
-`oc describe is hello-php`を実行して、適当なイメージに`test`タグを付与します。
-
-```
-oc tag hello-php@sha256:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx hello-php:test
-```
-
-タグ付けを行うとイメージを検出してテスト環境へのデプロイが実行され、イメージはテスト環境へとリリースされます。本番環境も同じ流れで作成してリリースできます。
-
-この利用方法での`oc describe is`の出力例ですが、以下のようになります。devがv4、testがv3、prodはv2がデプロイされています。この例では"v3"などの部分は読みやすいように書き換えてありますが、実際には64ケタのsha256値です。
-
-```
-$ oc describe is hello-php
+$ oc describe is hello-php -n hello
 Name:			hello-php
 Created:		25 hours ago
 Labels:			<none>
-Docker Pull Spec:	172.30.55.101:5000/hello-php/hello-php
+Docker Pull Spec:	172.30.55.101:5000/hello/hello-php
 
 Tag     Spec                      Created       PullSpec
-latest  library/hello-php:latest   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v4
-                                   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v3
-                                   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
-                                  25 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v1
+latest  library/hello-php:latest   2 hours ago  172.30.55.101:5000/hello/hello-php@sha256:v5
+                                   7 hours ago  172.30.55.101:5000/hello/hello-php@sha256:v4
+                                   7 hours ago  172.30.55.101:5000/hello/hello-php@sha256:v3
+                                   9 hours ago  172.30.55.101:5000/hello/hello-php@sha256:v2
+                                  25 hours ago  172.30.55.101:5000/hello/hello-php@sha256:v1
                                   25 hours ago  library/hello-php:latest
-test    library/hello-php:latest   7 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v3
-                                   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
-                                  25 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v1
-                                  25 hours ago  library/hello-php:latest
-prod    library/hello-php:latest   9 hours ago  172.30.55.101:5000/hello-php/hello-php@sha256:v2
+```
+
+```
+$ oc describe is hello-php -n prod-hello
+Name:			hello-php
+Created:		25 hours ago
+Labels:			<none>
+Docker Pull Spec:	172.30.55.101:5000/prod-hello/hello-php
+
+Tag     Spec                      Created       PullSpec
+prod    library/hello-php:latest   7 hours ago  172.30.55.101:5000/prod-hello/hello-php@sha256:v4
                                   25 hours ago  library/hello-php:latest
 ```
 
@@ -499,7 +471,7 @@ prod    library/hello-php:latest   9 hours ago  172.30.55.101:5000/hello-php/hel
 
 `oc new-app`では、ソースコードではなく一般的なDockerイメージを指定することもできます。
 
-OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.0/admin_guide/manage_scc.html)がかかっています。そのため、Dockerfileでユーザを作って動作するようなDockerイメージはそのままでは動作せず、実際にデプロイした場合はパーミッションエラーで起動しません。[Docker Hubのopenshiftユーザー](https://registry.hub.docker.com/repos/openshift/)でホストされているイメージはそのまま動作するように作られています。
+OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.1/admin_guide/manage_scc.html)があり、実行時にはランダムなUIDが割り当たります。そのため、Dockerfileで特定のユーザを作っていて特定のユーザでの動作を期待するようなDockerイメージや、USERを指定しておらずrootでの動作を前提としてしまっているイメージはそのままでは動作せず、実際にデプロイした場合はパーミッションエラーで起動しません。[Docker Hubのopenshiftユーザー](https://registry.hub.docker.com/repos/openshift/)でホストされているイメージはそのまま動作するように作られています。
 
 ```
 oc new-app openshift/jenkins-1-centos
@@ -514,17 +486,15 @@ OpenShiftではアプリケーションコンテナを複数立ち上げるこ�
 oc scale rc <rc-name> --replicas=2
 ```
 
-負荷に応じて自動的にスケールを制御するオートスケールは将来のバージョンで実装される予定です。
+負荷に応じて自動的にスケールを制御する[オートスケール](https://docs.openshift.com/enterprise/3.1/dev_guide/pod_autoscaling.html)というものもあります。
 
-OpenShiftのpodのデプロイ方法ですが、デフォルトは`Recreate`という方式でコンテナを再生成します。`Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
-
-別のデプロイ方法として`Rolling`があります。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行います。デプロイ方法を変更するにはDeploymentConfigを編集します。
+OpenShiftのpodのデプロイ方法は2つ`Rolling`と`Recreate`があり、デフォルトは`Rolling`です。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行うローリングアップデートであり、ベーシックな無停止リリースが可能となっています。
 
 ```
 oc edit dc <dc-name>
 ```
 
-ローリングアップデートを有効化することにより、ベーシックな無停止リリースが可能となります。
+`Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
 
 
 ### ロールバック
@@ -554,7 +524,7 @@ OpenShiftはサービスへの接続を監視しており、機能不全とな�
 
 ```
 oc delete pod <pod-name>
-oc exec -it -p <pod-name> -- kill 1
+oc rsh <pod-name> kill 1
 ```
 
 ### OSおよびミドルウェアのパッチ
@@ -562,21 +532,25 @@ oc exec -it -p <pod-name> -- kill 1
 openshiftプロジェクトのImageStreamに定義されているビルダーイメージにはミドルウェアやOSが含まれています。これらのミドルウェアやOSにセキュリティ修正などの変更がある場合には、`oc -import-image`を実行して新しいバージョンのイメージを取得します。関連するイメージで`latest`タグを参照しているアプリケーションなどは全て再ビルドされてデプロイされます。
 
 ```
-# oc project openshift
-# oc get is
-NAME                                 DOCKER REPO                                                      TAGS                   UPDATED
-jboss-amq-6                          registry.access.redhat.com/jboss-amq-6/amq-openshift             6.2,6.2-84,latest      9 days ago
-jboss-eap6-openshift                 registry.access.redhat.com/jboss-eap-6/eap-openshift             6.4,6.4-207,latest     9 days ago
-jboss-webserver3-tomcat7-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat7-openshift   3.0,3.0-135,latest     9 days ago
-jboss-webserver3-tomcat8-openshift   registry.access.redhat.com/jboss-webserver-3/tomcat8-openshift   3.0,3.0-137,latest     9 days ago
-mongodb                              registry.access.redhat.com/openshift3/mongodb-24-rhel7           2.4,latest,v3.0.0.0    9 days ago
-mysql                                registry.access.redhat.com/openshift3/mysql-55-rhel7             5.5,latest,v3.0.0.0    9 days ago
-nodejs                               registry.access.redhat.com/openshift3/nodejs-010-rhel7           0.10,latest,v3.0.0.0   9 days ago
-perl                                 registry.access.redhat.com/openshift3/perl-516-rhel7             5.16,latest,v3.0.0.0   9 days ago
-php                                  registry.access.redhat.com/openshift3/php-55-rhel7               5.5,latest,v3.0.0.0    9 days ago
-postgresql                           registry.access.redhat.com/openshift3/postgresql-92-rhel7        9.2,latest,v3.0.0.0    9 days ago
-python                               registry.access.redhat.com/openshift3/python-33-rhel7            3.3,latest,v3.0.0.0    9 days ago
-ruby                                 registry.access.redhat.com/openshift3/ruby-20-rhel7              2.0,latest,v3.0.0.0    9 days ago
+$ oc get is -n openshift
+NAME                                  DOCKER REPO                                                                    TAGS                               UPDATED
+fis-java-openshift                    registry.access.redhat.com/jboss-fuse-6/fis-java-openshift                     1.0-9,latest,1.0-10 + 2 more...    4 weeks ago
+fis-karaf-openshift                   registry.access.redhat.com/jboss-fuse-6/fis-karaf-openshift                    latest,1.0-10,1.0-11 + 2 more...   4 weeks ago
+jboss-amq-62                          registry.access.redhat.com/jboss-amq-6/amq62-openshift                         1.2-12,1.2,1.1 + 5 more...         4 weeks ago
+jboss-datagrid65-openshift            registry.access.redhat.com/jboss-datagrid-6/datagrid65-openshift               1.2-13,1.2-18,1.2-19 + 2 more...   4 weeks ago
+jboss-decisionserver62-openshift      registry.access.redhat.com/jboss-decisionserver-6/decisionserver62-openshift   1.2-10,1.2-17,1.2-18 + 2 more...   4 weeks ago
+jboss-eap64-openshift                 registry.access.redhat.com/jboss-eap-6/eap64-openshift                         1.3,1.3-10,1.2-19 + 7 more...      7 days ago
+jboss-webserver30-tomcat7-openshift   registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat7-openshift     1.1-2,1.1-6,1.2 + 5 more...        4 weeks ago
+jboss-webserver30-tomcat8-openshift   registry.access.redhat.com/jboss-webserver-3/webserver30-tomcat8-openshift     1.1-3,1.2-10,1.2-11 + 5 more...    4 weeks ago
+jenkins                               172.30.48.173:5000/openshift/jenkins                                           1,latest                           4 weeks ago
+mongodb                               172.30.48.173:5000/openshift/mongodb                                           2.4,2.6,latest                     4 weeks ago
+mysql                                 172.30.48.173:5000/openshift/mysql                                             5.6,latest,5.5                     4 weeks ago
+nodejs                                172.30.48.173:5000/openshift/nodejs                                            0.10,latest                        4 weeks ago
+perl                                  172.30.48.173:5000/openshift/perl                                              latest,5.20,5.16                   4 weeks ago
+php                                   172.30.48.173:5000/openshift/php                                               5.6,latest,5.5                     4 weeks ago
+postgresql                            172.30.48.173:5000/openshift/postgresql                                        9.4,latest,9.2                     4 weeks ago
+python                                172.30.48.173:5000/openshift/python                                            3.4,latest,3.3 + 1 more...         4 weeks ago
+ruby                                  172.30.48.173:5000/openshift/ruby                                              2.2,latest,2.0                     4 weeks ago
 # oadm build-chain --all
 {
 	"fullname": "openshift/php",
@@ -610,65 +584,20 @@ ruby                                 registry.access.redhat.com/openshift3/ruby-
 oc export bc,is,dc,svc --all --as-template=hello-php
 ```
 
-ただし、現在ImageStreamのexportが失敗するバグがあるので、ImageStreamは除外してください。ImageStreamは以下のような内容で簡単に定義できます。
-
-```
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    creationTimestamp: null
-    name: hello-php
-  spec: {}
-  status:
-    dockerImageRepository: ""
-```
-
-
 ## よくある質問
 
-- スクリプト言語での開発でOpenShiftを利用した場合、確認のためにgit pushが必須となり、Dockerイメージのビルドも待たなければいけないので、変更がすぐに反映されず開発スピードが落ちてしまいます。みなさんどうしているのですか？
-  - 個々の開発者がガリガリ書き換えて動かすことが必要なフェーズでは、OpenShiftを無理に利用しないほうが良いです。pushしたもの、チーム開発ブランチ、テスト環境、本番環境についてはOpenShiftを利用すれば良いでしょう。
 - アプリケーションのログはどうしたらいいですか？
   - Dockerコンテナの標準入出力は`oc logs`で参照でき、また、OpenShift上のjournaldにも集約されています。
   - クラウド環境ではfluentdなどのネットワークログサーバに送信するというのが一般的です。
   - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
-- `oc get all`の出力が古いもので埋まって見づらいのはどうしたらいいですか？
-  - 古いものの自動消去は検討中です。後続のリリースにご期待ください。
-- Jenkinsが簡単に利用できるような連携機能はないのですか？
-  - 残念ながら、OpenShift v3の最初のリリースではJenkinsサポートは未実装です。今年中にリリースされる3.1でJenkinsサポートが実装される予定であり、手動でJenkins連携の設定をするよりは簡単に設定ができるようになる予定です。
-  - 開発バージョンでは[サンプルアプリケーションとしてのJenkinsの定義](https://github.com/openshift/origin/tree/master/examples/jenkins)が提供されています。
 - カスタマイズはできますか？
   - はい、OpenShiftのほぼ全てがAPIで構成され、プログラマブルになっています。ocコマンドもWebコンソールも基本的にはAPIを叩いているだけのAPIクライアント実装です。
-  - ビルドされるイメージをカスタマイズしたい場合は、[`.sti/bin`ディレクトリにカスタムの`assemble`, `run`スクリプトを含めるか、カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.0/creating_images/s2i.html)します。
-  - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.0/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
+  - ビルドされるイメージをカスタマイズしたい場合は、[`.sti/bin`ディレクトリにカスタムの`assemble`, `run`スクリプトを含めるか、カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.1/creating_images/s2i.html)します。
+  - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.1/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
 
 
 ## リファレンス
 
-- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.0/welcome/index.html)
+- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.1/welcome/index.html)
 - [英語ブログ](https://blog.openshift.com/)
-
-
-## コマンドコピーのためのチートセクション
-
-```
-oc login
-oc new-project tkimura-hello-php
-oc new-app https://github.com/nekop/hello-php
-oc expose se hello-php
-oc start-build hello-php --follow
-oc build-logs hello-php-1
-oc describe bc hello-php
-oc describe dc hello-php
-oc describe is hello-php
-oc new-app --template=mysql-ephemeral --param=DATABASE_SERVICE_NAME=hello-php-mysql,MYSQL_DATABASE=hello,MYSQL_USER=user,MYSQL_PASSWORD=pass
-oc env dc hello-php MYSQL_USER=user MYSQL_PASSWORD=pass MYSQL_DATABASE=hello
-
-oc new-app -f https://raw.githubusercontent.com/nekop/hello-php/db/hello-php.yaml
-oc expose se hello-php
-oc tag library/hello-php:latest hello-php:test
-oc export dc,se,route --all -o yaml --as-template=hello-php > test-hello-php.yaml
-perl -i -pe 's/hello-php([^:\/@])/test-hello-php$1/g' test-hello-php.yaml
-perl -i -pe 's/name: hello-php:latest/name: hello-php:test/g' test-hello-php.yaml
-```
 
