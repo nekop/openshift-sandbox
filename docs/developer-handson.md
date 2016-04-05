@@ -56,7 +56,7 @@ Dockerコンテナでアプリケーションを動作させるためのPaaS (Pl
 
 簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
 
-![OpenShift Overview](https://raw.githubusercontent.com/nekop/openshift-sandbox/master/docs/oepnshift-overview.png)
+![OpenShift Overview](https://raw.githubusercontent.com/nekop/openshift-sandbox/master/docs/openshift-overview.png)
 
 環境をセットアップして利用するのではなく、OpenShiftのようにビルド済みのDockerイメージをDocker実行環境へデプロイするモデルは現在はImmutable InfrastructureやBlue Green Deploymentの実現方法として注目を集めています。
 
