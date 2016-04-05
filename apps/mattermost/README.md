@@ -3,6 +3,8 @@
 This is instant mattermost application for OpenShift Enterprise 3.
 
 ```
+oc new-project mattermost
+oc project mattermost
 oc new-app -f https://raw.githubusercontent.com/goern/openshift-sandbox/master/apps/mattermost/mattermost.yaml
 ```
 
@@ -20,8 +22,12 @@ spec:
   - ReadWriteOnce
   nfs:
     path: /srv/nfs/path
-    server: nfs-server 
+    server: nfs-server
   persistentVolumeReclaimPolicy: Retain
 
 # oc create -f mattermost-pv.yaml
 ```
+
+and a route:
+
+`oc expose service/mattermost --hostname=mattermost.example.com`
