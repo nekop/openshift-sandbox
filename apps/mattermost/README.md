@@ -1,7 +1,7 @@
-# Mattermost for OpenShift Enterprise v3
+# Mattermost for OpenShift Enterprise 3
 
-This is instant mattermost application for OpenShift Enterprise v3.
+This is instant mattermost application for OpenShift Enterprise 3.
 
 ```
-oc new-app -f https://raw.githubusercontent.com/nekop/openshift-sandbox/master/apps/mattermost/mattermost.yaml
+oc new-app -f https://raw.githubusercontent.com/goern/openshift-sandbox/master/apps/mattermost/mattermost.yaml
 ```
