@@ -33,9 +33,10 @@ RUN yum-config-manager --disable \* && \
 
 RUN cd /opt && \
     curl -LO https://releases.mattermost.com/2.1.0/mattermost-team-2.1.0-linux-amd64.tar.gz && \
-    tar xf mattermost.tar.gz &&\
-    rm mattermost.tar.gz && \
+    tar xf mattermost-team-2.1.0-linux-amd64.tar.gz &&\
+    rm mattermost-team-2.1.0-linux-amd64.tar.gz && \
     chmod -R 777 /opt/mattermost
+# FIXME this seems to be too 777ish
 
 COPY mattermost-launch.sh /usr/local/bin/mattermost-launch.sh
 COPY config.json /opt/mattermost/config/config.json
