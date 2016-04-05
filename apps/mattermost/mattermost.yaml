@@ -15,7 +15,7 @@ objects:
     source:
       contextDir: apps/mattermost
       git:
-        uri: https://github.com/nekop/openshift-sandbox
+        uri: https://github.com/goern/openshift-sandbox
       type: Git
     strategy:
       dockerStrategy:
