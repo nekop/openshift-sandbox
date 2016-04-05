@@ -1,7 +1,16 @@
 #!/bin/bash
 
+# Creates PVs on master node
+
+SERVER=`hostname`
+COUNT=50
+
+sudo mkdir -p /exports
+sudo chmod 777 /exports
+sudo chown nfsnobody:nfsnobody /exports
 oc project default
-for i in $(seq 1 50); do
+
+for i in $(seq 1 $COUNT); do
     PV=$(cat <<EOF
 apiVersion: v1
 kind: PersistentVolume
@@ -11,16 +20,15 @@ spec:
   capacity:
     storage: 5Gi
   accessModes:
-    - ReadWriteOnce
     - ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle
   nfs:
-    server: tkimura-ose-single.usersys.redhat.com
+    server: $SERVER
     path: /exports/pv$(printf %04d $i)
 EOF
 )
     echo "$PV" | oc create -f -
-    sudo mkdir /exports/pv$(printf %04d $i)
+    sudo mkdir -p /exports/pv$(printf %04d $i)
+    sudo chown nfsnobody:nfsnobody /exports/pv$(printf %04d $i)
 done
-sudo chown -R nfsnobody:nfsnobody /exports
-sudo chmod -R 777 /exports
 
