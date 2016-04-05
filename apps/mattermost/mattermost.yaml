@@ -22,7 +22,7 @@ objects:
         from:
           kind: ImageStreamTag
           name: rhel:latest
-      type: Docker2
+      type: Docker
     triggers:
     - type: ConfigChange
     - imageChange: {}
