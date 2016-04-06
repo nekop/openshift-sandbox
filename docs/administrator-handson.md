@@ -56,7 +56,7 @@ sudo subscription-manager repos \
      --enable=rhel-7-server-extras-rpms \
      --enable=rhel-7-server-optional-rpms \
      --enable=rhel-7-server-ose-3.1-rpms
-sudo yum update
+sudo yum update -y
 ```
 
 ### Dockerのイメージ領域設定
@@ -116,57 +116,13 @@ ssh-copy-id [cloud-user@]node01.example.com
 ssh-copy-id [cloud-user@]node02.example.com
 ```
 
-あとは以下のコマンドでAnsibleを実行するとインストールが行われます。
+これで準備は完了です。以下のコマンドでAnsibleを実行するとインストールが行われます。
 
 ```
 ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
 ```
 
-### Docker registryの作成
-
-Docker registryは全Docker imageを保持するため、かなり大きな容量が必要になります。専用のPersistentVolumeをRetainポリシーで作成します。以下はnfsでの例です。
-
-```
-oc create -f - <<EOF
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: registry
-spec:
-  capacity:
-    storage: 500Gi
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  nfs:
-    server: $SERVER
-    path: /exports/registry
-EOF
-```
-
-対応するPVCを作成して、レジストリを作成してPVCを設定します。PVCを設定すると自動的に再デプロイされます。
-
-
-```
-oc project default
-oc create -f - <<EOF
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: registry
-spec:
-  accessModes:
-    - ReadWriteMany
-  resources:
-    requests:
-      storage: 500Gi
-EOF
-oadm registry --config=/etc/origin/master/admin.kubeconfig \
-  --credentials=/etc/origin/master/openshift-registry.kubeconfig \
-  --images='registry.access.redhat.com/openshift3/ose-${component}:${version}'
-oc volume deploymentconfigs/docker-registry --add --name=registry -t pvc \
-     --claim-name=registry --overwrite
-```
+masterノードのAnsibleユーザはOpenShiftのcluster adminという全管理権限を持つsystem:adminアカウントとなり、`~/.kube/config`がsystem:adminユーザで設定されます。
 
 ### Persistence Volumeの設定と作成
 
@@ -223,6 +179,88 @@ EOF
 done
 ```
 
+### Docker registryの作成
+
+Docker registryは全Docker imageを保持するため、かなり大きな容量が必要になります。専用のPersistentVolumeをRetainポリシーで作成します。以下はnfsでの例です。
+
+```
+oc create -f - <<EOF
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry
+spec:
+  capacity:
+    storage: 500Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    server: $SERVER
+    path: /exports/registry
+EOF
+```
+
+対応するPVCを作成して、レジストリを作成してPVCを設定します。PVCを設定すると自動的に再デプロイされます。
+
+
+```
+oc project default
+oc create -f - <<EOF
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: registry
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+EOF
+oadm registry --config=/etc/origin/master/admin.kubeconfig \
+  --credentials=/etc/origin/master/openshift-registry.kubeconfig \
+  --images='registry.access.redhat.com/openshift3/ose-${component}:${version}'
+oc volume deploymentconfigs/docker-registry --add --name=registry -t pvc \
+  --claim-name=registry --overwrite
+```
+
+### Routerの作成
+
+Routerはインストーラにより自動的に作成されているので、カスタマイズの必要がなければそのままで構いません。
+
+## メンテナンス
+
+### ノードのコンテナとイメージの削除
+
+ノードには[ガベージコレクション](https://docs.openshift.com/enterprise/3.1/admin_guide/garbage_collection.html)の機能があり、 停止された古いコンテナや、コンテナに利用されていないイメージは自動的に消去されるようになっています。
+
+### 古い、既に利用されていないイメージの削除
+
+[Pruning Objectsの章](https://docs.openshift.com/enterprise/3.1/admin_guide/pruning_resources.html)で、DeploymentとBuildとイメージの削除について触れられています。
+
+イメージはDocker registry内でディスク容量を消費するので、定期的にクリーンアップする必要がでてきます。イメージを削除するためにはイメージを参照しているDeploymentとBuildも削除する必要があるので、基本的にはこのメンテナンス作業は全て同時に行います。
+
+クリーンアップを行う`oadm prune`コマンドはデフォルトでdry-runとなっており、実際に削除を実行するには`--confirm`オプションを指定する必要があります。
+
+DeploymentとBuildのクリーンアップはストレートに実行できます。
+
+```
+oadm prune deployments
+oadm prune deployments --confirm
+oadm prune builds
+oadm prune builds --confirm
+```
+
+イメージの削除を行う`oadm prune images`はOSE 3.1では技術的な制限によりcluster adminアカウントでは実行することができません。専用のユーザを用意し、`system:image-pruner`権限を付与する必要があります。`system:admin`ユーザに戻るには`oc login`に-uオプションを指定する必要があります。-uオプションではない`oc login`コマンドではユーザ名にコロンは受け付けません。
+
+```
+oadm policy add-cluster-role-to-user system:image-pruner pruner
+oc login -u pruner
+oadm prune images
+oadm prune images --confirm
+oc login -u "system:admin"
+```
 
 ## リファレンス
 
