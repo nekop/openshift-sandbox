@@ -23,6 +23,9 @@
     - [ノードからPodを移動](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%8B%E3%82%89pod%E3%82%92%E7%A7%BB%E5%8B%95)
   - [バックアップ](#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A2%E3%83%83%E3%83%97)
   - [インストール構成例](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%A7%8B%E6%88%90%E4%BE%8B)
+  - [トラブルシューティング](#%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0)
+    - [ログレベルの変更](#%E3%83%AD%E3%82%B0%E3%83%AC%E3%83%99%E3%83%AB%E3%81%AE%E5%A4%89%E6%9B%B4)
+    - [情報の収集](#%E6%83%85%E5%A0%B1%E3%81%AE%E5%8F%8E%E9%9B%86)
   - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -454,6 +457,47 @@ OpenShiftでバックアップが必要となる要素は以下の3つです。
 - HA masterでのmasterとetcdの同居は一般的
 - Single masterでのmasterとinfraノードの同居は一般的
   - masterとinfraを同居する構成の場合、masterはschedulable=falseとしてセットアップされてしまうので、当該ノードに`openshift_schedulable=true openshift_node_labels="{'region': 'infra'}"`を指定する必要がある
+
+## トラブルシューティング
+
+英語ですが、サポート契約者向けに[トラブルシューティングガイド](https://access.redhat.com/solutions/1542293)があります。
+
+### ログレベルの変更
+
+ログレベルは`/etc/sysconfig/atomic-openshift*`に定義されており、デフォルトでは`--loglevel=2`です。0-5までの値が指定でき、5が一番多くのログを出力する設定です。
+
+### 情報の収集
+
+基本的な情報は`sosreport`で取得できます。`sosreport`はsosパッケージで提供されるコマンドで、ホストの基本的な情報を網羅的に収集してアーカイブを作成します。`docker.all=on`を指定しないと終了したコンテナの情報が収集されないので、調べたいコンテナのログが見つからない、というようなことになります。
+
+```
+sosreport -e docker -k docker.all=on
+```
+OpenShiftは残念ながらまだsosreportに対応していないため、設定やログは別途取得する必要があります。
+
+```
+journalctl -u atomic-openshift-master > `hostname`-openshift-master.log
+journalctl -u atomic-openshift-node   > `hostname`-openshift-node.log
+tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
+```
+
+ノードやネットワーク、Docker registryやRouterなどのOpenShiftのインフラを調査するには以下のコマンド群を利用します。
+
+```
+oc get node       > oc-get-node.txt
+oc describe node  > oc-describe-node.txt
+oc get hostsubnet > oc-get-hostsubnet.txt
+oc get all,pvc -n default >  oc-get-all-default.txt 
+oc get event -n default >  oc-get-event-default.txt
+openshift ex diagnostics
+```
+
+特定のプロジェクトのトラブルシューティングでは以下の情報を取得します。
+
+```
+oc get all,pvc -n $PROJECT >  oc-get-all-$PROJECT.txt 
+oc get event -n $PROJECT >  oc-get-event-$PROJECT.txt 
+```
 
 ## リファレンス
 
