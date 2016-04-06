@@ -17,9 +17,7 @@
     - [ノードのコンテナとイメージの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%81%A8%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%81%AE%E5%89%8A%E9%99%A4)
     - [古い、既に利用されていないイメージの削除](#%E5%8F%A4%E3%81%84%E3%80%81%E6%97%A2%E3%81%AB%E5%88%A9%E7%94%A8%E3%81%95%E3%82%8C%E3%81%A6%E3%81%84%E3%81%AA%E3%81%84%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%81%AE%E5%89%8A%E9%99%A4)
     - [ノードの追加](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E8%BF%BD%E5%8A%A0)
-    - [ノードの追加](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E8%BF%BD%E5%8A%A0-1)
     - [ノードの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E5%89%8A%E9%99%A4)
-    - [ノードの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E5%89%8A%E9%99%A4-1)
     - [ノードからPodを移動](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%8B%E3%82%89pod%E3%82%92%E7%A7%BB%E5%8B%95)
   - [バックアップ](#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A2%E3%83%83%E3%83%97)
   - [インストール構成例](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%A7%8B%E6%88%90%E4%BE%8B)
@@ -392,33 +390,6 @@ node[03:04].example.com openshift_node_labels="{'region': 'primary'}"
 ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/scaleup.yml
 ```
 
-### ノードの追加
-
-ノードの追加はAnsibleのnew_nodesセクションに`new_nodes`を追加して、scaleup.ymlというplaybookを実行します。実行後にnew_nodesをnodes配下に移動します。
-
-```
-[OSEv3:children]
-masters
-nodes
-new_nodes
-
-(省略)
-[new_nodes]
-node[03:04].example.com openshift_node_labels="{'region': 'primary'}"
-```
-
-```
-ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/scaleup.yml
-```
-
-### ノードの削除
-
-ノードの削除は以下のコマンドで削除できます。
-
-```
-oc delete node $NODENAME
-```
-
 ### ノードの削除
 
 ノードの削除は以下のコマンドで削除できます。
@@ -489,7 +460,7 @@ oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
 oc get all,pvc -n default >  oc-get-all-default.txt 
 oc get event -n default >  oc-get-event-default.txt
-openshift ex diagnostics
+openshift ex diagnostics > openshift-ex-diagnostics.txt
 ```
 
 特定のプロジェクトのトラブルシューティングでは以下の情報を取得します。
