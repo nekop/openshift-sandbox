@@ -425,12 +425,6 @@ OpenShiftでバックアップが必要となる要素は以下の3つです。
 - Persistence Storage
   - 各ストレージサイドでのバックアップ
 
-## インストール構成例
-
-- HA masterでのmasterとetcdの同居は一般的
-- Single masterでのmasterとinfraノードの同居は一般的
-  - masterとinfraを同居する構成の場合、masterはschedulable=falseとしてセットアップされてしまうので、当該ノードに`openshift_schedulable=true openshift_node_labels="{'region': 'infra'}"`を指定する必要がある
-
 ## トラブルシューティング
 
 英語ですが、サポート契約者向けに[トラブルシューティングガイド](https://access.redhat.com/solutions/1542293)があります。
