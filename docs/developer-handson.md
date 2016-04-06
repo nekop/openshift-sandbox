@@ -34,7 +34,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# OpenShift v3 開発者向けハンズオン
+# OpenShift Enterprise 3.1.1 開発者向けハンズオン
 
 ## 準備
 
