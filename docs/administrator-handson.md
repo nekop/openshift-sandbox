@@ -9,8 +9,20 @@
     - [サブスクリプションの設定](#%E3%82%B5%E3%83%96%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%97%E3%82%B7%E3%83%A7%E3%83%B3%E3%81%AE%E8%A8%AD%E5%AE%9A)
     - [Dockerのイメージ領域設定](#docker%E3%81%AE%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E9%A0%98%E5%9F%9F%E8%A8%AD%E5%AE%9A)
     - [AnsibleでOpenShiftをインストールする](#ansible%E3%81%A7openshift%E3%82%92%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%99%E3%82%8B)
-    - [Docker registryの作成](#docker-registry%E3%81%AE%E4%BD%9C%E6%88%90)
     - [Persistence Volumeの設定と作成](#persistence-volume%E3%81%AE%E8%A8%AD%E5%AE%9A%E3%81%A8%E4%BD%9C%E6%88%90)
+    - [Docker registryの作成](#docker-registry%E3%81%AE%E4%BD%9C%E6%88%90)
+    - [Routerの作成](#router%E3%81%AE%E4%BD%9C%E6%88%90)
+  - [メンテナンス](#%E3%83%A1%E3%83%B3%E3%83%86%E3%83%8A%E3%83%B3%E3%82%B9)
+    - [ノードの状況確認](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E7%8A%B6%E6%B3%81%E7%A2%BA%E8%AA%8D)
+    - [ノードのコンテナとイメージの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E3%81%A8%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%81%AE%E5%89%8A%E9%99%A4)
+    - [古い、既に利用されていないイメージの削除](#%E5%8F%A4%E3%81%84%E3%80%81%E6%97%A2%E3%81%AB%E5%88%A9%E7%94%A8%E3%81%95%E3%82%8C%E3%81%A6%E3%81%84%E3%81%AA%E3%81%84%E3%82%A4%E3%83%A1%E3%83%BC%E3%82%B8%E3%81%AE%E5%89%8A%E9%99%A4)
+    - [ノードの追加](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E8%BF%BD%E5%8A%A0)
+    - [ノードの追加](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E8%BF%BD%E5%8A%A0-1)
+    - [ノードの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E5%89%8A%E9%99%A4)
+    - [ノードの削除](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%AE%E5%89%8A%E9%99%A4-1)
+    - [ノードからPodを移動](#%E3%83%8E%E3%83%BC%E3%83%89%E3%81%8B%E3%82%89pod%E3%82%92%E7%A7%BB%E5%8B%95)
+  - [バックアップ](#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A2%E3%83%83%E3%83%97)
+  - [インストール構成例](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%A7%8B%E6%88%90%E4%BE%8B)
   - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -181,7 +193,7 @@ done
 
 ### Docker registryの作成
 
-Docker registryは全Docker imageを保持するため、かなり大きな容量が必要になります。専用のPersistentVolumeをRetainポリシーで作成します。以下はnfsでの例です。
+Docker registryは全Docker imageを保持するため、かなり大きな容量が必要になります。専用のPersistentVolumeをRetainポリシーで作成します。以下はnfsでのPVの定義例です。
 
 ```
 oc create -f - <<EOF
@@ -227,9 +239,105 @@ oc volume deploymentconfigs/docker-registry --add --name=registry -t pvc \
 
 ### Routerの作成
 
-Routerはインストーラにより自動的に作成されているので、カスタマイズの必要がなければそのままで構いません。
+Routerは`region=infra`ラベルが付与されているノードがあればインストーラにより自動的に作成されているので、カスタマイズの必要がなければそのままで構いません。
 
 ## メンテナンス
+
+masterノードのAnsibleユーザが全管理権限を持つsystem:adminユーザなので、管理作業は基本的にmaster上のAnsibleユーザを利用することになります。
+
+### ノードの状況確認
+
+ノードのステータスは`oc get node`、詳細は`oc describe node`で確認することができます。
+
+```
+oc get node
+oc describe node
+```
+
+実行例は以下のようになります。
+
+```
+$ oc get node | perl -pe 's/tkimura-ose-//g' | perl -pe 's/usersys.redhat.com/example.com/g'
+NAME                 LABELS                                                     STATUS    AGE
+master.example.com   kubernetes.io/hostname=master.example.com,region=infra     Ready     33d
+node01.example.com   kubernetes.io/hostname=node01.example.com,region=primary   Ready     33d
+
+$ oc describe node
+Name:			master.example.com
+Labels:			kubernetes.io/hostname=master.example.com,region=infra
+CreationTimestamp:	Thu, 03 Mar 2016 16:36:37 +0900
+Phase:			
+Conditions:
+  Type		Status	LastHeartbeatTime			LastTransitionTime			Reason		Message
+  ────		──────	─────────────────			──────────────────			──────		───────
+  Ready 	True 	Wed, 06 Apr 2016 14:56:56 +0900 	Tue, 05 Apr 2016 10:24:39 +0900 	KubeletReady 	kubelet is posting ready status
+Addresses:	10.64.220.227,10.64.220.227
+Capacity:
+ cpu:		4
+ memory:	3880672Ki
+ pods:		40
+System Info:
+ Machine ID:			e65d0a4b27024020b935bb26ed2a9847
+ System UUID:			E65D0A4B-2702-4020-B935-BB26ED2A9847
+ Boot ID:			ccf6dd95-0c9c-4368-8560-fd80b827ef31
+ Kernel Version:		3.10.0-327.10.1.el7.x86_64
+ OS Image:			Employee SKU
+ Container Runtime Version:	docker://1.8.2-el7
+ Kubelet Version:		v1.1.0-origin-1107-g4c8e6f4
+ Kube-Proxy Version:		v1.1.0-origin-1107-g4c8e6f4
+ExternalID:			master.example.com
+Non-terminated Pods:		(2 in total)
+  Namespace			Name				CPU Requests	CPU Limits	Memory Requests	Memory Limits
+  ─────────			────				────────────	──────────	───────────────	─────────────
+  default			docker-registry-6-tt5o0		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  default			router-1-jpxpd			0 (0%)		0 (0%)		0 (0%)		0 (0%)
+Allocated resources:
+  (Total limits may be over 100%, i.e., overcommitted. More info: http://releases.k8s.io/HEAD/docs/user-guide/compute-resources.md)
+  CPU Requests	CPU Limits	Memory Requests	Memory Limits
+  ────────────	──────────	───────────────	─────────────
+  0 (0%)	0 (0%)		0 (0%)		0 (0%)
+No events.
+
+Name:			node01.example.com
+Labels:			kubernetes.io/hostname=node01.example.com,region=primary
+CreationTimestamp:	Thu, 03 Mar 2016 16:26:53 +0900
+Phase:			
+Conditions:
+  Type		Status	LastHeartbeatTime			LastTransitionTime			Reason		Message
+  ────		──────	─────────────────			──────────────────			──────		───────
+  Ready 	True 	Wed, 06 Apr 2016 14:56:58 +0900 	Mon, 04 Apr 2016 12:45:19 +0900 	KubeletReady 	kubelet is posting ready status
+Addresses:	10.64.221.1,10.64.221.1
+Capacity:
+ memory:	8009432Ki
+ pods:		40
+ cpu:		4
+System Info:
+ Machine ID:			5f43afca39f24298ae1d89c440524408
+ System UUID:			5F43AFCA-39F2-4298-AE1D-89C440524408
+ Boot ID:			066d1304-f18d-47e0-8973-ad06241a6f4c
+ Kernel Version:		3.10.0-327.13.1.el7.x86_64
+ OS Image:			Employee SKU
+ Container Runtime Version:	docker://1.8.2-el7
+ Kubelet Version:		v1.1.0-origin-1107-g4c8e6f4
+ Kube-Proxy Version:		v1.1.0-origin-1107-g4c8e6f4
+ExternalID:			node01.example.com
+Non-terminated Pods:		(7 in total)
+  Namespace			Name				CPU Requests	CPU Limits	Memory Requests	Memory Limits
+  ─────────			────				────────────	──────────	───────────────	─────────────
+  foo-php			hello-php-1-348w1		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  foo-php			hello-php-mysql-1-fmgy3		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  mattermost			mattermost-1-b1ne9		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  mattermost			mysql-1-kh8ql			0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  prod-hello			hello-php-1-af2eo		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  test				hello-sinatra-1-cl2qi		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+  test-java			hello-javaee-10-et18m		0 (0%)		0 (0%)		0 (0%)		0 (0%)
+Allocated resources:
+  (Total limits may be over 100%, i.e., overcommitted. More info: http://releases.k8s.io/HEAD/docs/user-guide/compute-resources.md)
+  CPU Requests	CPU Limits	Memory Requests	Memory Limits
+  ────────────	──────────	───────────────	─────────────
+  0 (0%)	0 (0%)		0 (0%)		0 (0%)
+No events.
+```
 
 ### ノードのコンテナとイメージの削除
 
@@ -261,6 +369,91 @@ oadm prune images
 oadm prune images --confirm
 oc login -u "system:admin"
 ```
+
+### ノードの追加
+
+ノードの追加はAnsibleのnew_nodesセクションに`new_nodes`を追加して、scaleup.ymlというplaybookを実行します。実行後にnew_nodesをnodes配下に移動します。
+
+```
+[OSEv3:children]
+masters
+nodes
+new_nodes
+
+(省略)
+[new_nodes]
+node[03:04].example.com openshift_node_labels="{'region': 'primary'}"
+```
+
+```
+ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/scaleup.yml
+```
+
+### ノードの追加
+
+ノードの追加はAnsibleのnew_nodesセクションに`new_nodes`を追加して、scaleup.ymlというplaybookを実行します。実行後にnew_nodesをnodes配下に移動します。
+
+```
+[OSEv3:children]
+masters
+nodes
+new_nodes
+
+(省略)
+[new_nodes]
+node[03:04].example.com openshift_node_labels="{'region': 'primary'}"
+```
+
+```
+ansible-playbook /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/scaleup.yml
+```
+
+### ノードの削除
+
+ノードの削除は以下のコマンドで削除できます。
+
+```
+oc delete node $NODENAME
+```
+
+### ノードの削除
+
+ノードの削除は以下のコマンドで削除できます。
+
+```
+oc delete node $NODENAME
+```
+
+### ノードからPodを移動
+
+`oadm manage-node`コマンドを利用することで、ノードからPodを移動することができます。
+
+```
+oadm manage-node node02.example.com --schedulable=false
+oadm manage-node node02.example.com --evacuate --pod-selector=app=myapp
+oadm manage-node node02.example.com --schedulable=true
+```
+
+## バックアップ
+
+OpenShiftでバックアップが必要となる要素は以下の3つです。
+
+- etcd のデータ
+  - `/var/lib/origin/openshift.local.etcd/` (non-HA)
+  - `/var/lib/etcd/` (HA)
+- 各ノードの設定ファイル
+  - `/etc/origin/`
+  - `/etc/etcd/` (HA)
+  - `/etc/sysconfig/atomic-openshift*`
+  - `/etc/sysconfig/docker*`
+- Persistence Storage
+  - 各ストレージサイドでのバックアップ
+
+## インストール構成例
+
+- HA masterでのmasterとetcdの同居は一般的
+- Single masterでのmasterとinfraノードの同居は一般的
+  - masterとinfraを同居する構成の場合、masterはschedulable=falseとしてセットアップされてしまうので、当該ノードに`openshift_schedulable=true openshift_node_labels="{'region': 'infra'}"`を指定する必要がある
 
 ## リファレンス
 
