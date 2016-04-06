@@ -22,8 +22,10 @@
   - [バックアップ](#%E3%83%90%E3%83%83%E3%82%AF%E3%82%A2%E3%83%83%E3%83%97)
   - [インストール構成例](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E6%A7%8B%E6%88%90%E4%BE%8B)
   - [トラブルシューティング](#%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0)
+    - [トラブルシューティングのためのパッケージ](#%E3%83%88%E3%83%A9%E3%83%96%E3%83%AB%E3%82%B7%E3%83%A5%E3%83%BC%E3%83%86%E3%82%A3%E3%83%B3%E3%82%B0%E3%81%AE%E3%81%9F%E3%82%81%E3%81%AE%E3%83%91%E3%83%83%E3%82%B1%E3%83%BC%E3%82%B8)
     - [ログレベルの変更](#%E3%83%AD%E3%82%B0%E3%83%AC%E3%83%99%E3%83%AB%E3%81%AE%E5%A4%89%E6%9B%B4)
     - [情報の収集](#%E6%83%85%E5%A0%B1%E3%81%AE%E5%8F%8E%E9%9B%86)
+    - [コンテナ内ネットワークスペースのテスト](#%E3%82%B3%E3%83%B3%E3%83%86%E3%83%8A%E5%86%85%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%B9%E3%83%9A%E3%83%BC%E3%82%B9%E3%81%AE%E3%83%86%E3%82%B9%E3%83%88)
   - [リファレンス](#%E3%83%AA%E3%83%95%E3%82%A1%E3%83%AC%E3%83%B3%E3%82%B9)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -433,6 +435,14 @@ OpenShiftでバックアップが必要となる要素は以下の3つです。
 
 英語ですが、サポート契約者向けに[トラブルシューティングガイド](https://access.redhat.com/solutions/1542293)があります。
 
+### トラブルシューティングのためのパッケージ
+
+以下のパッケージ群は一般的なトラブルシューティングに役立つものです。入れておいて損はないでしょう。
+
+```
+sos sysstat net-tools bind-utils lsof tcpdump kexec-tools strace
+```
+
 ### ログレベルの変更
 
 ログレベルは`/etc/sysconfig/atomic-openshift*`に定義されており、デフォルトでは`--loglevel=2`です。0-5までの値が指定でき、5が一番多くのログを出力する設定です。
@@ -468,6 +478,19 @@ openshift ex diagnostics > openshift-ex-diagnostics.txt
 ```
 oc get all,pvc -n $PROJECT >  oc-get-all-$PROJECT.txt 
 oc get event -n $PROJECT >  oc-get-event-$PROJECT.txt 
+```
+
+### コンテナ内ネットワークスペースのテスト
+
+Dockerコンテナには最低限のコマンドしか使えない場合がほとんどであり、`oc rsh`でpodに接続しても、たとえばnetstatコマンドなどがインストールされておらず利用できない、といったことが多々あります。
+
+そのような場合には、DockerホストとコンテナIDを特定して、当該Dockerホストにssh接続を行って、nsenterコマンドで当該pidのネットワークスペースをアタッチしてDockerホスト側のコマンドを利用することができます。
+
+```
+oc get pod $POD -o wide
+ssh <docker host>
+ps -eaf | grep <pod process filter string>
+nsenter -n -t $PID netstat -tan
 ```
 
 ## リファレンス
