@@ -468,16 +468,16 @@ tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-ope
 oc get node       > oc-get-node.txt
 oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
-oc get all,pvc -n default >  oc-get-all-default.txt 
-oc get event -n default >  oc-get-event-default.txt
-openshift ex diagnostics > openshift-ex-diagnostics.txt
+oc get all,pvc -n default > oc-get-all-default.txt 
+oc get event   -n default > oc-get-event-default.txt
+openshift ex diagnostics  > openshift-ex-diagnostics.txt
 ```
 
 特定のプロジェクトのトラブルシューティングでは以下の情報を取得します。
 
 ```
-oc get all,pvc -n $PROJECT >  oc-get-all-$PROJECT.txt 
-oc get event -n $PROJECT >  oc-get-event-$PROJECT.txt 
+oc get all,pvc -n $PROJECT > oc-get-all-$PROJECT.txt 
+oc get event   -n $PROJECT > oc-get-event-$PROJECT.txt 
 ```
 
 ### コンテナ内ネットワークスペースのテスト
