@@ -38,6 +38,8 @@
 
 # OpenShift v3 開発者向けハンズオン
 
+# Deprecated. Latest version is available at https://github.com/nekop/openshift-sandbox/blob/master/docs/developer-handson.md
+
 ## 準備
 
 - このハンズオンの実行には構築済みのOpenShift Enterprise v3環境が必要です。Persistent Volumeは利用していません。
