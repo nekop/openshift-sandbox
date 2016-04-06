@@ -260,7 +260,7 @@ oc describe node
 実行例は以下のようになります。
 
 ```
-$ oc get node | perl -pe 's/tkimura-ose-//g' | perl -pe 's/usersys.redhat.com/example.com/g'
+$ oc get node
 NAME                 LABELS                                                     STATUS    AGE
 master.example.com   kubernetes.io/hostname=master.example.com,region=infra     Ready     33d
 node01.example.com   kubernetes.io/hostname=node01.example.com,region=primary   Ready     33d
