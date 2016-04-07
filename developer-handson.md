@@ -126,22 +126,11 @@ oc new-app <git public clone URL>
 oc expose service <app-name>
 ```
 
+`oc new-app`を実行するとビルドが開始され、成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。
+
 `oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.0/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
 
 `oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, seという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
-
-
-## ビルドの実行とアプリケーションの確認
-
-マニュアルでソースコードからDockerイメージを生成するビルドを行う`oc start-build`を実行します。成功するとDockerイメージがImageStreamに登録され、実行用podが再作成されてアプリケーションが実行されます。`bc-name`は`app-name`と同一です。`build-name`は末尾に`-1`のようなシーケンス番号が付くので注意してください。
-
-```
-oc start-build <bc-name>
-oc get build
-oc build-logs <build-name>
-```
-
-最初のビルドは`oc new-app`を発行してから少し時間がたてば開始されます。手動でビルドを発行したのと合わせて2つビルドが同時に走ると片方がDockerイメージのpushに失敗することがありますが気にしないでください。
 
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
