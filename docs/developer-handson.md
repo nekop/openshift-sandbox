@@ -178,7 +178,6 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - `oc get <resource>`
 - `oc describe <resource> <resource-name>`
 - `oc get all -o yaml`
-- `oc build-logs <build-name>`
 - `oc logs <pod-name>`
 - `oc rsh <pod-name>`
 - `oc delete <resource> <resource-name>`
