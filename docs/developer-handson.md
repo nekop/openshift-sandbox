@@ -39,6 +39,7 @@
 ## 準備
 
 - このハンズオンの実行には構築済みのOpenShift Enterprise 3.1.1環境が必要です。Persistent Volumeは利用していません。
+- 利用者のPCにgitコマンドがインストールされている必要があります。GitHubまたはその他のGitホスティングサービスが必要です。
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
 - GitHubとの連携を行うためには、OpenShift EnterpriseとGitHubのネットワークが相互通信可能である必要があります。つまり、インターネット上に構築されている必要があります。
@@ -131,10 +132,10 @@ oc expose service <app-name>
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
 ```
-http://`<app-name>.<project-name>.<cloud-domain>`
+http://`<app-name>-<project-name>.<cloud-domain>`
 ```
 
-`oc expose`を行うと、アプリケーションへアクセスするためのルーティング情報が生成されます。デフォルトでは`<app-name>.<project-name>.<cloud-domain>`という形式のURLとなります。`--hostname`オプションで任意のURLに変更できるので、DNS設定と合わせて任意のURLへのリクエストをOpenShiftでハンドルすることができます。
+`oc expose`を行うと、アプリケーションへアクセスするためのルーティング情報が生成されます。デフォルトでは`<app-name>-<project-name>.<cloud-domain>`という形式のURLとなります。`--hostname`オプションで任意のURLに変更できるので、DNS設定と合わせて任意のURLへのリクエストをOpenShiftでハンドルすることができます。
 
 
 ## Webコンソール
