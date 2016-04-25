@@ -53,7 +53,7 @@
 
 Dockerコンテナでアプリケーションを動作させるためのPaaS (Platform as a Service)基盤です。アプリケーションをDockerコンテナ上でビルドしてDockerイメージを作成し、Dockerコンテナとして動作させることができます。Dockerコンテナのスケジューリングを行うGoogleの[Kubernetes](http://kubernetes.io/)をベースに構築されています。
 
-簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLを起動するなど、Dockerコンテナ群を自由にコントロールすることができます。
+簡単なコマンド操作でアプリケーションを配置したり、複製したり、MySQLなどのデータベースを利用したりするなど、Dockerコンテナ群を自由にコントロールすることができます。
 
 ![OpenShift Overview](https://raw.githubusercontent.com/nekop/openshift-sandbox/master/docs/openshift-overview.png)
 
@@ -80,7 +80,7 @@ OpenShift Clientコマンドは`oc`という単一の実行ファイルです。
 ## ログイン
 
 ```
-oc login <server>[:<port>]
+oc login MASTER_HOST[:MASTER_PORT]
 ```
 
 ログアウトを行うにはoc logoutを実行します。
@@ -95,22 +95,23 @@ TLS接続には`--certificate-authority`オプションに対応するca.crtを�
 プロジェクト名はOpenShift環境全体でユニークである必要がありますので、個人用プロジェクトは個人のidなどを名前に含めたほうが良いです(ex. `tkimura-test-php`)。また、OpenShiftの設計上、プロジェクト名は後からリネームすることはできません。プロジェクト情報をダンプして修正して取り込むことで、同一構成を新しい名前プロジェクトにすることは簡単にできます。
 
 ```
-oc new-project <project-name>
+oc new-project PROJECT_NAME
 ```
 
 
 ## アプリケーション作成
 
-まずはgithubにアプリケーションのリポジトリを作成し、cloneしてください。アプリケーション名(リポジトリ名)は英字開始で、ダッシュ(ハイフン)以外の記号は利用しないでください。数字で開始したり、アンダーバーが含まれていると、OpenShiftやURLの仕様違反となる名前になってしまい、後のステップでエラーとなってしまうので注意してください。
+まずはgithubにアプリケーションのリポジトリを作成し、cloneしてください。`hello-php`というような名前が良いでしょう。アプリケーション名(リポジトリ名)は英字開始で、ダッシュ(ハイフン)以外の記号は利用しないでください。数字で開始したり、アンダーバーが含まれていると、OpenShiftやURLの仕様違反となる名前になってしまい、後のステップでエラーとなってしまうので注意してください。
 
 ```
-git clone <git clone URL>
+git clone GIT_CLONE_URL
 ```
 
 cloneが完了したら、最初のお約束であるHello Worldを配置します。
 
 ```
-cd <repository>; echo '<?php echo "Hello world"; ?>' > index.php
+cd GIT_REPOSITORY_DIR
+echo '<?php echo "Hello world"; ?>' > index.php
 git add index.php
 git commit -m 'Hello world'
 git push
@@ -119,23 +120,23 @@ git push
 gitへpushしたらOpenShift上にアプリケーションを作成します。この`oc new-app`ではOpenShiftがgitのcloneを発行するため、sshなどの認証が必要なclone URLは利用しないでください。一般的にはhttpsのURLが認証なしのclone URLとなることが多いでしょう。認証も可能ですがこのハンズオンのスコープには含めていません。
 
 ```
-oc new-app <git public clone URL>
-oc expose service <app-name>
+oc new-app GIT_PUBLIC_CLONE_URL
+oc expose service APP_NAME
 ```
 
 `oc new-app`を実行するとビルドが開始され、成功するとDockerイメージがDocker registryにpushされます。DockerイメージがpushされるとImageStreamの更新トリガーが動作し、実行用podが再作成されてアプリケーションが実行されます。
 
 `oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.1/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
 
-`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, svcという各種オブジェクト(後述します)と実行用podが作成されます。初期状態では実行用podはビルド済みイメージが未作成で見つからないためError状態となります。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
+`oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, svcという各種オブジェクト(後述します)と実行用podが作成されます。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
 
 ビルドが完了すると、以下のURLでアプリケーションにアクセスすることが可能になっているはずです。
 
 ```
-http://`<app-name>-<project-name>.<cloud-domain>`
+http://APP_NAME-PROJECT_NAME.CLOUD_DOMAIN
 ```
 
-`oc expose`を行うと、アプリケーションへアクセスするためのルーティング情報が生成されます。デフォルトでは`<app-name>-<project-name>.<cloud-domain>`という形式のURLとなります。`--hostname`オプションで任意のURLに変更できるので、DNS設定と合わせて任意のURLへのリクエストをOpenShiftでハンドルすることができます。
+`oc expose`を行うと、アプリケーションへアクセスするためのルーティング情報が生成されます。デフォルトでは`APP_NAME-PROJECT_NAME.CLOUD_DOMAIN`という形式のURLとなります。`--hostname`オプションで任意のURLに変更できるので、DNS設定と合わせて任意のURL、任意のドメインへのリクエストをOpenShiftでハンドルすることができます。
 
 
 ## Webコンソール
@@ -143,7 +144,7 @@ http://`<app-name>-<project-name>.<cloud-domain>`
 ログインにも利用したOpenShiftのmasterサーバにはWebコンソールが付属しています。デフォルトでhttps, 8443ポートを利用するようになっています。ブラウザで開いてログインしてみましょう。
 
 ```
-https://<server>:8443/
+https://MASTER_HOST:8443/
 ```
 
 Webコンソールでは構成がグラフィカルに表示されるようになっています。今はアプリケーションのみの単一構成なのであまり見どころはないのですが、アプリケーションのpodを増殖させたり、データベースなどを追加するとにぎやかになります。
@@ -177,13 +178,13 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - `oc get all`
 - `oc get events`
 - `oc get pod`
-- `oc get <resource>`
-- `oc describe <resource> <resource-name>`
+- `oc get RESOURCE_TYPE
+- `oc describe RESOURCE_TYPE RESOURCE_NAME`
 - `oc get all -o yaml`
-- `oc logs <pod-name>`
-- `oc rsh <pod-name>`
-- `oc delete <resource> <resource-name>`
-- `oc delete all --all` # プロジェクトの内容全消し
+- `oc logs POD_NAME`
+- `oc rsh POD_NAME`
+- `oc delete RESOURCE_TYPE RESOURCE_NAME`
+- `oc delete all,pvc --all` # プロジェクトの内容全消し
 
 ### リソースのリスト
 
@@ -210,14 +211,13 @@ Webコンソールでは構成がグラフィカルに表示されるように�
 - imagestream
 - deploymentconfig
 - replicationcontroller
-- persistentvolumeclaim
 - service
 - pod
 
 
 ## 自動ビルドの設定
 
-`oc describe bc <name>`を実行してビルドコンフィグを参照すると、hookのURLが取得できます。このhookをGitHubのWebhookに設定したり、Webhook GenericのURLをgitのpost-updateなどのhookでcurl -X POSTで呼び出すことで自動的にビルドがトリガーされます。
+`oc describe bc BUILD_CONFIG_NAME`を実行してビルドコンフィグを参照すると、hookのURLが取得できます。このhookをGitHubのWebhookに設定したり、Webhook GenericのURLをgitのpost-updateなどのhookでcurl -X POSTで呼び出すことで自動的にビルドがトリガーされます。
 
 ```
 $ oc describe bc hello-php
@@ -248,7 +248,7 @@ GitHubのリポジトリのページから、`Settings` -> `Webhooks & services`
 git commit --allow-empty -m 'empty' && git push
 ```
 
-OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。Webhookからのビルドでは、`oc describe build <build-name>`や`oc describe isimage <image>`の出力にgitのcommit SHA-1値が含まれるようになります。
+OpenShiftはhookからブランチ名などを取得し、ビルド要否を判断して自動ビルドを行います。Webhookからのビルドでは、`oc describe build BUILD_NAME`や`oc describe isimage IMAGE`の出力にgitのcommit SHA-1値が含まれるようになります。
 
 
 ## データベースの追加とテンプレート
@@ -312,15 +312,15 @@ $mysqli->close();
 
 ```
 oc get pod
-oc describe pod <pod-name> # IP取得
-oc rsh <pod-name>
-mysql -h <host> -u <user> -p
+oc describe pod POD_NAME # IP取得
+oc rsh POD_NAME
+mysql -h HOSTNAME -u USERNAME -p
 ```
 
 もしくは`oc port-forward`で自マシンと接続します。
 
 ```
-oc port-forward -p <pod-name>  3306:3306
+oc port-forward -p POD_NAME  3306:3306
 mysql -h 127.0.0.1 -P 3306 -u user -p
 ```
 
@@ -335,14 +335,14 @@ mysql -h 127.0.0.1 -P 3306 -u user -p
 
 ```
 oc get pod
-oc logs <build-pod-name>
+oc logs BUILD_POD_NAME
 ```
 
 デプロイに失敗した、もしくはデプロイは成功しているが正常に動いていない、という場合は`oc logs`で対象podのログを参照します。デプロイのリトライは`oc deploy --retry`で行うことができます。
 
 ```
-oc logs <pod-name>
-oc deploy <dc-name> --retry
+oc logs POD_NAME
+oc deploy DEPLOYMENT_CONFIG_NAME --retry
 ```
 
 phpのpodではApache httpdが動作しており、`oc logs`でログを参照するとサーバ名の設定がされていないため以下の警告メッセージが見えますが無視してかまいません。OpenShift上では不要なものです。
@@ -362,7 +362,7 @@ oc get events
 コンテナの内部を調べたい場合は`oc rsh`を利用します。しかし、Dockerコンテナの中は通常最低限のツールのみがインストールされている状態ですので、あまりできることは多くありません。コンテナの中のファイルの確認などには便利です。
 
 ```
-oc rsh <pod-name>
+oc rsh POD_NAME
 ```
 
 ハンズオン中に実際にトラブルが発生したものを例に挙げてフォローおよび解説する予定です。何もトラブルがなかったらごめんなさい。
@@ -472,7 +472,7 @@ oc new-app openshift/jenkins-1-centos
 OpenShiftではアプリケーションコンテナを複数立ち上げることができます。接続はOpenShiftに含まれる`router`コンポーネントによって、接続数の少ないコンテナへロードバランスされます。`router`コンポーネントは[HAProxy](http://www.haproxy.org/)によって実装されており、`leastconn`ロードバランスがデフォルトで適用されるようになっています。
 
 ```
-oc scale rc <rc-name> --replicas=2
+oc scale rc REPLICATION_CONFIG_NAME --replicas=2
 ```
 
 負荷に応じて自動的にスケールを制御する[オートスケール](https://docs.openshift.com/enterprise/3.1/dev_guide/pod_autoscaling.html)というものもあります。
@@ -480,7 +480,7 @@ oc scale rc <rc-name> --replicas=2
 OpenShiftのpodのデプロイ方法は2つ`Rolling`と`Recreate`があり、デフォルトは`Rolling`です。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行うローリングアップデートであり、ベーシックな無停止リリースが可能となっています。
 
 ```
-oc edit dc <dc-name>
+oc edit dc DEPLOYMENT_CONFIG_NAME
 ```
 
 `Recreate`では全てのpodを停止してから、新しいpodをデプロイします。
@@ -491,19 +491,19 @@ oc edit dc <dc-name>
 まずはロールバック対象となるデプロイ名を探します。
 
 ```
-oc describe dc <dc-name>
+oc describe dc DEPLOYMENT_CONFIG_NAME
 ```
 
 ロールバック対象のデプロイ名を指定して`oc rollback`を発行します。発行すると、指定されたデプロメントと同じ内容の新しいデプロイメントが作成され、自動デプロイトリガーが無効化されます。
 
 ```
-oc rollback <deployment-name>
+oc rollback DEPLOYMENT_CONFIG_NAME
 ```
 
 問題が解決したあと、自動デプロイトリガーを有効化するには以下を発行します。
 
 ```
-oc deploy <dc-name> --enable-triggers
+oc deploy DEPLOYMENT_CONFIG_NAME --enable-triggers
 ```
 
 
@@ -512,8 +512,8 @@ oc deploy <dc-name> --enable-triggers
 OpenShiftはサービスへの接続を監視しており、機能不全となっているコンテナは自動的に再起動されます。pod内のプロセスを停止したり、podを削除したりしても短時間で復旧します。
 
 ```
-oc delete pod <pod-name>
-oc rsh <pod-name> kill 1
+oc delete pod POD_NAME
+oc rsh POD_NAME kill 1
 ```
 
 ### OSおよびミドルウェアのパッチ
