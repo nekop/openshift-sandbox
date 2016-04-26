@@ -37,8 +37,6 @@ defaults
   timeout server 30s
   # Long timeout for WebSocket connections.
   timeout tunnel 1h
-  option log-health-checks 
-  log global
 
 {{ if (gt .StatsPort 0) }}
 listen stats :{{.StatsPort}}
