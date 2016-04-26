@@ -175,7 +175,6 @@ backend openshift_default
   option forwardfor
   #option http-keep-alive
   option http-pretend-keepalive
-  option log-health-checks
   # To configure custom default errors, you can either uncomment the
   # line below (server ... 127.0.0.1:8080) and point it to your custom
   # backend service or alternatively, you can send a custom 503 error.
@@ -202,6 +201,7 @@ backend be_edge_http_{{$cfgIdx}}
   mode http
   option redispatch
   option forwardfor
+  option log-health-checks 
   balance leastconn
   timeout check 3s
   http-request set-header X-Forwarded-Host %[req.hdr(host)]
