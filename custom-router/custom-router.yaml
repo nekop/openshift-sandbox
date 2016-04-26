@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: custom-router
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: ${APPLICATION_NAME}
+  spec:
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ${APPLICATION_NAME}:latest
+    source:
+      contextDir: custom-router
+      git:
+        uri: https://github.com/nekop/openshift-sandbox
+      type: Git
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: openshift3/ose-haproxy-router:v3.1.1.6
+      type: Docker
+    triggers:
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ${APPLICATION_NAME}
+parameters:
+- name: APPLICATION_NAME
+  required: true
+  value: custom-router
