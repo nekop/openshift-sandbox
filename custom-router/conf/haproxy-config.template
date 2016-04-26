@@ -206,6 +206,7 @@ backend be_http_{{$cfgIdx}}
 backend be_edge_http_{{$cfgIdx}}
                 {{ end }}
   mode http
+  option log-health-checks
   option httplog
   option redispatch
   option forwardfor
