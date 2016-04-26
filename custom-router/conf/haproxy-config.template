@@ -37,6 +37,8 @@ defaults
   timeout server 30s
   # Long timeout for WebSocket connections.
   timeout tunnel 1h
+  option log-health-checks 
+  log global
 
 {{ if (gt .StatsPort 0) }}
 listen stats :{{.StatsPort}}
@@ -201,7 +203,6 @@ backend be_edge_http_{{$cfgIdx}}
   mode http
   option redispatch
   option forwardfor
-  option log-health-checks 
   balance leastconn
   timeout check 3s
   http-request set-header X-Forwarded-Host %[req.hdr(host)]
