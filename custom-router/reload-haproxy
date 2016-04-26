@@ -15,7 +15,7 @@ if [ -f $pid_file ]; then
 fi
 
 if [ -n "$old_pid" ]; then
-  /usr/sbin/haproxy -d -V -f $config_file -p $pid_file -sf $old_pid
+  /usr/sbin/haproxy -d -f $config_file -p $pid_file -sf $old_pid &
 else
-  /usr/sbin/haproxy -d -V -f $config_file -p $pid_file
+  /usr/sbin/haproxy -d -f $config_file -p $pid_file &
 fi
