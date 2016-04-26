@@ -8,6 +8,7 @@
 global
   # maxconn 4096
   daemon
+  log tkimura-ose-master.usersys.redhat.com local1 info
   ca-base /etc/ssl
   crt-base /etc/ssl
   stats socket /var/lib/haproxy/run/haproxy.sock mode 600 level admin
@@ -37,8 +38,8 @@ defaults
   timeout server 30s
   # Long timeout for WebSocket connections.
   timeout tunnel 1h
-  option log-health-checks 
   log global
+  option log-health-checks
 
 {{ if (gt .StatsPort 0) }}
 listen stats :{{.StatsPort}}
@@ -62,6 +63,7 @@ listen stats :1936
 frontend public
   bind :80
   mode http
+  option httplog
   tcp-request inspect-delay 5s
   tcp-request content accept if HTTP
 
@@ -86,6 +88,7 @@ frontend public
 # that terminates encryption in this router (edge)
 frontend public_ssl
   bind :443
+  option httplog
   tcp-request  inspect-delay 5s
   tcp-request content accept if { req_ssl_hello_type 1 }
 
@@ -119,6 +122,7 @@ frontend fe_sni
   # terminate ssl on edge
   bind 127.0.0.1:10444 ssl no-sslv3 {{ if (len .DefaultCertificate) gt 0 }}crt {{.DefaultCertificate}}{{ else }}crt /var/lib/haproxy/conf/default_pub_keys.pem{{ end }} crt {{ $workingDir }}/certs accept-proxy
   mode http
+  option httplog
 
   # check re-encrypt backends first - from most specific to general path.
   acl reencrypt base,map_beg(/var/lib/haproxy/conf/os_reencrypt.map) -m found
@@ -153,6 +157,7 @@ frontend fe_no_sni
   # terminate ssl on edge
   bind 127.0.0.1:10443 ssl no-sslv3 {{ if (len .DefaultCertificate) gt 0 }}crt {{.DefaultCertificate}}{{ else }}crt /var/lib/haproxy/conf/default_pub_keys.pem{{ end }} accept-proxy
   mode http
+  option httplog
 
   # check re-encrypt backends first - path or host based.
   acl reencrypt base,map_beg(/var/lib/haproxy/conf/os_reencrypt.map) -m found
@@ -174,6 +179,7 @@ frontend fe_no_sni
 
 backend openshift_default
   mode http
+  option httplog
   option forwardfor
   #option http-keep-alive
   option http-pretend-keepalive
@@ -201,6 +207,7 @@ backend be_http_{{$cfgIdx}}
 backend be_edge_http_{{$cfgIdx}}
                 {{ end }}
   mode http
+  option httplog
   option redispatch
   option forwardfor
   balance leastconn
@@ -233,6 +240,7 @@ backend be_tcp_{{$cfgIdx}}
             {{ if eq $cfg.TLSTermination "reencrypt" }}
 backend be_secure_{{$cfgIdx}}
   mode http
+  option httplog
   option redispatch
   balance leastconn
   timeout check 3s
