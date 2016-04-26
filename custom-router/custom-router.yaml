@@ -21,7 +21,7 @@ objects:
       dockerStrategy:
         from:
           kind: ImageStreamTag
-          name: openshift3/ose-haproxy-router:v3.1.1.6
+          name: ose-haproxy-router:v3.1.1.6
       type: Docker
     triggers:
     - type: ConfigChange
@@ -31,6 +31,12 @@ objects:
   kind: ImageStream
   metadata:
     name: ${APPLICATION_NAME}
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    name: ose-haproxy-router
+  spec:
+    dockerImageRepository: registry.access.redhat.com/openshift3/ose-haproxy-router
 parameters:
 - name: APPLICATION_NAME
   required: true
