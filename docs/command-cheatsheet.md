@@ -170,15 +170,17 @@ oc annotate namespace default openshift.io/node-selector=""
 
 ## Access heapster API
 
+We can use `-k` instead of `--cacert ...`.
+
 ```
-curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key https://`hostname`:8443/api/v1/proxy/namespaces/openshift-infra/services/https:heapster:/api/v1/model/namespaces/default/pods/
+curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key https://$MASTER_URL/api/v1/proxy/namespaces/openshift-infra/services/https:heapster:/api/v1/model/namespaces/default/pods/
 ```
 
 https://github.com/kubernetes/heapster/blob/master/docs/model.md
 
 ## Access Hawkular Metrics API
 
-Direct access to Hawkular Metrics API is not officially supported. We can use `-k` instead of `--cacert ...`. The $METRICS_ID can be extracted from the first 2 examples.
+Direct access to Hawkular Metrics API is not officially supported. We can use `-k` instead of `--cacert ...`. The `$METRICS_ID` can be extracted from the first 2 examples, "id" field.
 
 ```
 curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H 'Hawkular-Tenant: $PROJECT' https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/metrics?type=gauge | python -mjson.tool
