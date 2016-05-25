@@ -450,7 +450,7 @@ sosreport -e docker -k docker.all=on
 OpenShiftは残念ながらまだsosreportに対応していないため、設定やログは別途取得する必要があります。
 
 ```
-journalctl -u atomic-openshift-master > `hostname`-openshift-master.log
+journalctl -u atomic-openshift-master -u atomic-openshift-master-api -u atomic-openshift-master-controllers > `hostname`-openshift-master.log
 journalctl -u atomic-openshift-node   > `hostname`-openshift-node.log
 tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
 ```
@@ -463,15 +463,20 @@ oc get node       > oc-get-node.txt
 oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
 oc get event      > oc-get-event-default.txt
-oc get all,pvc -o yaml    > oc-get-all-default.txt
-openshift ex diagnostics  > openshift-ex-diagnostics.txt
+oc get all,pvc -o wide   > oc-get-all-default.txt
+oc get all,pvc -o yaml   > oc-get-all-yaml-default.txt
+openshift ex diagnostics > openshift-ex-diagnostics.txt
 ```
+
+必要に応じて`oc get logs $POD_NAME`を利用してdocker-registryやrouterのログも取得してください。
 
 特定のプロジェクトのトラブルシューティングでは以下の情報を取得します。
 
 ```
-oc get all,pvc -o yaml -n $PROJECT > oc-get-all-$PROJECT.txt
-oc get event -n $PROJECT > oc-get-event-$PROJECT.txt
+oc project $PROJECT
+oc get all,pvc -o wide > oc-get-all-$PROJECT.txt
+oc get all,pvc -o yaml > oc-get-all-yaml-$PROJECT.txt
+oc get event > oc-get-event-$PROJECT.txt
 ```
 
 ### コンテナ内ネットワークスペースのテスト
