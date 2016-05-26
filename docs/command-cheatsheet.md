@@ -168,9 +168,13 @@ oc annotate namespace default openshift.io/node-selector=region=infra
 oc annotate namespace default openshift.io/node-selector=""
 ```
 
-## Access heapster API
+## Access kubelet API
 
-We can use `-k` instead of `--cacert ...`.
+```
+curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key -v https://$NODE:10250/pods
+```
+
+## Access heapster API
 
 ```
 curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key https://$MASTER_URL/api/v1/proxy/namespaces/openshift-infra/services/https:heapster:/api/v1/model/namespaces/default/pods/
