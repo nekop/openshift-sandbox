@@ -246,6 +246,7 @@ EOF
     echo "$PV" | oc create -f -
     mkdir -p /exports/pv$(printf %04d $i)
     chown nfsnobody:nfsnobody /exports/pv$(printf %04d $i)
+    chmod 770 /exports/pv$(printf %04d $i)
 done
 ```
 
@@ -253,6 +254,9 @@ done
 
 ```
 oc project default
+mkdir -p /exports/registry
+chown nfsnobody:nfsnobody /exports/registry
+chmod 770 /exports/registry
 oc create -f - <<EOF
 apiVersion: v1
 kind: PersistentVolume
