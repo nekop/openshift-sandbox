@@ -341,3 +341,20 @@ oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME=$KIBANA_HOS
 echo "Make sure to add the follwoing to the master-config.xml and restart master."
 echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
 ```
+
+## Pruning
+
+You need to create a user and add `system:image-pruner` role to the user.
+
+```
+oadm policy add-cluster-role-to-user system:image-pruner pruner
+```
+
+```
+oc login -u "system:admin"
+oadm prune deployments --confirm
+oadm prune builds --confirm
+oc login -u pruner
+oadm prune images --confirm
+oc login -u "system:admin"
+```
