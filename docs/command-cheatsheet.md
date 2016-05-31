@@ -144,6 +144,7 @@ spec:
   maxReplicas: 4
   cpuUtilization:
     targetPercentage: 10
+EOF
 ```
 
 ## Define nodeSelector in DeploymentConfig
