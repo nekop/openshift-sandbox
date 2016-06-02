@@ -343,6 +343,16 @@ echo "Make sure to add the follwoing to the master-config.xml and restart master
 echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
 ```
 
+For 3.2.0, https://access.redhat.com/solutions/2339271:
+
+```
+oc new-app logging-support-template
+oc import-image logging-elasticsearch:3.2.0 --from registry.access.redhat.com/openshift3/logging-elasticsearch:3.2.0
+oc import-image logging-auth-proxy:3.2.0    --from registry.access.redhat.com/openshift3/logging-auth-proxy:3.2.0
+oc import-image logging-kibana:3.2.0        --from registry.access.redhat.com/openshift3/logging-kibana:3.2.0
+oc import-image logging-fluentd:3.2.0       --from registry.access.redhat.com/openshift3/logging-fluentd:3.2.0
+```
+
 ## Pruning
 
 You need to create a user and add `system:image-pruner` role to the user.
