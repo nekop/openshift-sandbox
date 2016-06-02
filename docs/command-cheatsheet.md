@@ -113,17 +113,17 @@ oc get event > oc-get-event-$PROJECT.txt
 
 ## Define resource requests and limits in DeploymentConfig
 
+Currently there is no easy way to patch with array/list so we use perl here.
+
 ```
-oc patch dc $DC_NAME -p 'spec:
-  template:
-    spec:
-      resources:
-        limits:
-          cpu: 500m
-          memory: 512Mi
-        requests:
-          cpu: 500m
-          memory: 512Mi'
+RESOUCES='        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi'
+oc get dc $DC_NAME -o yaml | perl -pe "s/        resources: {}/$RESOUCES/" | oc replace -f -
 ```
 
 ## Define Horizontal Pod Autoscaler (hpa)
