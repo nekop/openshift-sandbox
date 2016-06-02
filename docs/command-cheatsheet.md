@@ -173,6 +173,7 @@ oc annotate namespace default openshift.io/node-selector=""
 
 ```
 curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key -v https://$NODE:10250/pods
+curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/admin.crt --key /etc/origin/master/admin.key -v https://$NODE:10250/stats/$NAMESPACE/$POD_NAME/$POD_UID/$POD_SHORT_NAME
 ```
 
 ## Access heapster API
