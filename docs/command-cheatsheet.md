@@ -88,7 +88,7 @@ oc get hostsubnet > oc-get-hostsubnet.txt
 oc get event      > oc-get-event-default.txt
 oc get all,pvc -o wide   > oc-get-all-default.txt
 oc get all,pvc -o yaml   > oc-get-all-yaml-default.txt
-openshift ex diagnostics > openshift-ex-diagnostics.txt
+openshift ex diagnostics --diaglevel=0 > openshift-ex-diagnostics.txt
 ```
 
 Get docker-registry and router logs by `oc get logs $POD_NAME` if needed.

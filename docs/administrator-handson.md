@@ -459,13 +459,14 @@ tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-ope
 
 ```
 oc project default
+oc version        > oc-version.txt
 oc get node       > oc-get-node.txt
 oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
 oc get event      > oc-get-event-default.txt
 oc get all,pvc -o wide   > oc-get-all-default.txt
 oc get all,pvc -o yaml   > oc-get-all-yaml-default.txt
-openshift ex diagnostics > openshift-ex-diagnostics.txt
+openshift ex diagnostics --diaglevel=0 > openshift-ex-diagnostics.txt
 ```
 
 必要に応じて`oc get logs $POD_NAME`を利用してdocker-registryやrouterのログも取得してください。
