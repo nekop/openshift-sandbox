@@ -75,6 +75,27 @@ oc rsh $POD_NAME
 oc exec $POD_NAME $COMMAND
 ```
 
+## Read resource schema doc
+
+```
+oc explain dc
+oc explain dc.spec
+```
+
+## Export
+
+```
+oc export is,bc,dc,svc --as-template=app.yaml
+```
+
+## Debug
+
+```
+oc debug dc $DC_NAME
+oc debug dc $DC_NAME --as-root=true
+oc debug dc $DC_NAME --node-name=$NODENAME
+```
+
 ## Troubleshoot OSE infrastructure
 
 It includes docker, openshift services, node, docker-registry and router in default project
@@ -127,6 +148,14 @@ oc get dc $DC_NAME -o yaml | perl -pe "s/        resources: {}/$RESOUCES/" | oc 
 ```
 
 ## Define Horizontal Pod Autoscaler (hpa)
+
+In 3.2 we can use `oc autoscale`
+
+```
+oc autoscale dc $DC_NAME --max=4 --cpu-percent=10
+```
+
+For 3.1:
 
 ```
 oc create -f - <<EOF
