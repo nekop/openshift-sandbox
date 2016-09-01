@@ -304,20 +304,8 @@ spec:
     server: $SERVER
     path: /exports/registry
 EOF
-oc create -f - <<EOF
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: registry
-spec:
-  accessModes:
-  - ReadWriteMany
-  resources:
-    requests:
-      storage: 500Gi
-EOF
-oadm registry --selector="region=infra" --config=/etc/origin/master/admin.kubeconfig --credentials=/etc/origin/master/openshift-registry.kubeconfig --images='registry.access.redhat.com/openshift3/ose-${component}:${version}' --replicas=1 --service-account=registry
-oc volume deploymentconfigs/docker-registry --add --name=registry-storage -t pvc --claim-name=registry --overwrite
+oadm registry --selector="region=infra" --config=/etc/origin/master/admin.kubeconfig --service-account=registry --images='registry.access.redhat.com/openshift3/ose-${component}:${version}'
+oc volume dc docker-registry --add --name=registry-storage -t pvc --claim-name=registry --claim-mode=ReadWriteMany --claim-size=500Gi --mount-path=/registry --overwrite
 ```
 
 ## Enabling Cluster Metrics
@@ -399,4 +387,11 @@ oadm prune builds --confirm
 oc login -u pruner
 oadm prune images --confirm
 oc login -u "system:admin"
+```
+
+## Manage nodes using Ansible ad-hoc command
+
+```
+ansible masters -a "sudo systemctl restart atomic-openshift-master"
+ansible nodes -a "sudo systemctl restart atomic-openshift-node"
 ```
