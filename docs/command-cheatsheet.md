@@ -190,31 +190,8 @@ oc patch dc $DC_NAME -p "spec:
 
 ## Define Horizontal Pod Autoscaler (hpa)
 
-In 3.2 we can use `oc autoscale`
-
 ```
 oc autoscale dc $DC_NAME --max=4 --cpu-percent=10
-```
-
-For 3.1:
-
-```
-oc create -f - <<EOF
-apiVersion: extensions/v1beta1
-kind: HorizontalPodAutoscaler
-metadata:
-  name: $HPA_NAME
-spec:
-  scaleRef:
-    apiVersion: v1
-    kind: DeploymentConfig
-    name: $DC_NAME
-    subresource: scale
-  minReplicas: 1
-  maxReplicas: 4
-  cpuUtilization:
-    targetPercentage: 10
-EOF
 ```
 
 ## Define nodeSelector in DeploymentConfig
