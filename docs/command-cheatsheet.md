@@ -109,9 +109,9 @@ oc get node       > oc-get-node.txt
 oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
 oc get event      > oc-get-event-default.txt
-oc get all,pvc -o wide   > oc-get-all-default.txt
-oc get all,pvc -o yaml   > oc-get-all-yaml-default.txt
-openshift ex diagnostics --diaglevel=0 > openshift-ex-diagnostics.txt
+oc get all,pvc,quota,limits -o wide   > oc-get-all-default.txt
+oc get all,pvc,quota,limits -o yaml   > oc-get-all-yaml-default.txt
+oadm diagnostics --diaglevel=0 > oadm-diagnostics.txt
 ```
 
 Get docker-registry and router logs by `oc get logs $POD_NAME` if needed.
@@ -129,8 +129,8 @@ tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-ope
 
 ```
 oc project $PROJECT
-oc get all,pvc -o wide > oc-get-all-$PROJECT.txt
-oc get all,pvc -o yaml > oc-get-all-yaml-$PROJECT.txt
+oc get all,pvc,quota,limits -o wide > oc-get-all-$PROJECT.txt
+oc get all,pvc,quota,limits -o yaml > oc-get-all-yaml-$PROJECT.txt
 oc get event > oc-get-event-$PROJECT.txt
 ```
 

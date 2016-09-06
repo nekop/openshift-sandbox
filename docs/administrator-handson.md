@@ -341,6 +341,12 @@ Allocated resources:
 No events.
 ```
 
+また、診断コマンド`oadm diagnostics`もインストールが正常に終了しているかどうかの確認に便利です。実行結果の部分のErrorが0であることを確認してください。
+
+```
+oadm diagnostics --diaglevel=0 > oadm-diagnostics.txt
+```
+
 ### ノードのコンテナとイメージの削除
 
 ノードには[ガベージコレクション](https://docs.openshift.com/enterprise/3.1/admin_guide/garbage_collection.html)の機能があり、 停止された古いコンテナや、コンテナに利用されていないイメージは自動的に消去されるようになっています。
@@ -464,9 +470,9 @@ oc get node       > oc-get-node.txt
 oc describe node  > oc-describe-node.txt
 oc get hostsubnet > oc-get-hostsubnet.txt
 oc get event      > oc-get-event-default.txt
-oc get all,pvc -o wide   > oc-get-all-default.txt
-oc get all,pvc -o yaml   > oc-get-all-yaml-default.txt
-openshift ex diagnostics --diaglevel=0 > openshift-ex-diagnostics.txt
+oc get all,pvc,quota,limits -o wide   > oc-get-all-default.txt
+oc get all,pvc,quota,limits -o yaml   > oc-get-all-yaml-default.txt
+oadm diagnostics --diaglevel=0 > oadm-diagnostics.txt
 ```
 
 必要に応じて`oc get logs $POD_NAME`を利用してdocker-registryやrouterのログも取得してください。
@@ -475,8 +481,8 @@ openshift ex diagnostics --diaglevel=0 > openshift-ex-diagnostics.txt
 
 ```
 oc project $PROJECT
-oc get all,pvc -o wide > oc-get-all-$PROJECT.txt
-oc get all,pvc -o yaml > oc-get-all-yaml-$PROJECT.txt
+oc get all,pvc,quota,limits -o wide > oc-get-all-$PROJECT.txt
+oc get all,pvc,quota,limits -o yaml > oc-get-all-yaml-$PROJECT.txt
 oc get event > oc-get-event-$PROJECT.txt
 ```
 
