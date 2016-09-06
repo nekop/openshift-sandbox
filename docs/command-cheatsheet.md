@@ -134,6 +134,14 @@ oc get all,pvc -o yaml > oc-get-all-yaml-$PROJECT.txt
 oc get event > oc-get-event-$PROJECT.txt
 ```
 
+## Claim PersistentVolume
+
+```
+oc new-app sonatype/nexus
+oc volume dc nexus --remove --confirm
+oc volume dc nexus --add --name=nexus-storage -t pvc --claim-name=nexus --claim-mode=ReadWriteMany --claim-size=1Gi --mount-path=/sonatype-work
+```
+
 ## Define resource requests and limits in DeploymentConfig
 
 ```
@@ -151,7 +159,7 @@ oc patch dc $DC_NAME -p "spec:
             memory: 512Mi"
 ```
 
-## Define livenessProve and readinessProve
+## Define livenessProve and readinessProve in DeploymentConfig
 
 ```
 oc patch dc $DC_NAME -p "spec:
