@@ -136,17 +136,48 @@ oc get event > oc-get-event-$PROJECT.txt
 
 ## Define resource requests and limits in DeploymentConfig
 
-Currently there is no easy way to patch with array/list so we use perl here.
-
 ```
-RESOUCES='        resources:
+oc patch dc $DC_NAME -p "spec:
+  template:
+    spec:
+      containers:
+      - name: $CONTAINER_NAME
+        resources:
           limits:
             cpu: 500m
             memory: 512Mi
           requests:
             cpu: 500m
-            memory: 512Mi'
-oc get dc $DC_NAME -o yaml | perl -pe "s/        resources: {}/$RESOUCES/" | oc replace -f -
+            memory: 512Mi"
+```
+
+## Define livenessProve and readinessProve
+
+```
+oc patch dc $DC_NAME -p "spec:
+  template:
+    spec:
+      containers:
+      - name: $CONTAINER_NAME
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5"
 ```
 
 ## Define Horizontal Pod Autoscaler (hpa)
@@ -181,11 +212,11 @@ EOF
 ## Define nodeSelector in DeploymentConfig
 
 ```
-oc patch dc $DC_NAME -p 'spec:
+oc patch dc $DC_NAME -p "spec:
   template:
     spec:
       nodeSelector:
-        region: infra'
+        region: infra"
 ```
 
 ## Define nodeSelector in Project
@@ -220,9 +251,9 @@ https://github.com/kubernetes/heapster/blob/master/docs/model.md
 Direct access to Hawkular Metrics API is not officially supported. We can use `-k` instead of `--cacert ...`. The `$METRICS_ID` can be extracted from the first 2 examples, "id" field.
 
 ```
-curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H 'Hawkular-Tenant: $PROJECT' https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/metrics?type=gauge | python -mjson.tool
-curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H 'Hawkular-Tenant: $PROJECT' https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/metrics?type=counter | python -mjson.tool
-curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H 'Hawkular-Tenant: $PROJECT' https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/counters/$(perl -MURI::Escape -e 'print uri_escape($ARGV[0])' $METRICS_ID)/data?bucketDuration=1d | python -m json.tool
+curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H "Hawkular-Tenant: $PROJECT" https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/metrics?type=gauge | python -mjson.tool
+curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H "Hawkular-Tenant: $PROJECT" https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/metrics?type=counter | python -mjson.tool
+curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t)" -H "Hawkular-Tenant: $PROJECT" https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics/counters/$(perl -MURI::Escape -e 'print uri_escape($ARGV[0])' $METRICS_ID)/data?bucketDuration=1d | python -m json.tool
 ```
 
 ## Dump etcd
