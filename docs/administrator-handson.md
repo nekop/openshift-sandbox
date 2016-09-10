@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [OpenShift Enterprise 3.1.1 管理者向けハンズオン](#openshift-enterprise-311-%E7%AE%A1%E7%90%86%E8%80%85%E5%90%91%E3%81%91%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3)
+- [OpenShift Enterprise 3.2 管理者向けハンズオン](#openshift-enterprise-311-%E7%AE%A1%E7%90%86%E8%80%85%E5%90%91%E3%81%91%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3)
   - [インストールの事前要件](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB%E3%81%AE%E4%BA%8B%E5%89%8D%E8%A6%81%E4%BB%B6)
   - [インストール](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%83%88%E3%83%BC%E3%83%AB)
     - [インスタンスの準備](#%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%81%AE%E6%BA%96%E5%82%99)
@@ -29,7 +29,7 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# OpenShift Enterprise 3.1.1 管理者向けハンズオン
+# OpenShift Enterprise 3.2 管理者向けハンズオン
 
 ## インストールの事前要件
 
@@ -43,7 +43,7 @@
 
 ## インストール
 
-ここでは簡略化した基本的なインストールの手順を紹介します。セットアップの詳細については[オフィシャルのインストールガイド](https://docs.openshift.com/enterprise/3.1/install_config/index.html)を参照してください。
+ここでは簡略化した基本的なインストールの手順を紹介します。セットアップの詳細については[オフィシャルのインストールガイド](https://docs.openshift.com/enterprise/3.2/install_config/index.html)を参照してください。
 
 ### インスタンスの準備
 
@@ -69,7 +69,7 @@ sudo subscription-manager repos \
      --enable=rhel-7-server-rpms \
      --enable=rhel-7-server-extras-rpms \
      --enable=rhel-7-server-optional-rpms \
-     --enable=rhel-7-server-ose-3.1-rpms
+     --enable=rhel-7-server-ose-3.2-rpms
 sudo yum update -y
 ```
 
@@ -86,7 +86,7 @@ EOF
 
 ### AnsibleでOpenShiftをインストールする
 
-AnsibleでOpenShiftをインストールする方法はマニュアルでは[Advanced Installation](https://docs.openshift.com/enterprise/3.1/install_config/install/advanced_install.html)というタイトルで記述されていますが、ウィザード形式ではない、くらいの意味でそれほどAdvancedでもありません。基本的に用意するファイルはAnsibleのインベントリファイルひとつだけです。
+AnsibleでOpenShiftをインストールする方法はマニュアルでは[Advanced Installation](https://docs.openshift.com/enterprise/3.2/install_config/install/advanced_install.html)というタイトルで記述されていますが、ウィザード形式ではない、くらいの意味でそれほどAdvancedでもありません。基本的に用意するファイルはAnsibleのインベントリファイルひとつだけです。
 
 この例ではmasterをインストールホストとしても利用します。masterに`atomic-openshift-utils`パッケージをインストールします。依存としてansibleもインストールされます。
 
@@ -140,7 +140,7 @@ masterノードのAnsibleユーザはOpenShiftのcluster adminという全管理
 
 ### Persistence Volumeの設定と作成
 
-Persistence Volumeのセットアップは環境により異なるので[公式ドキュメント](https://docs.openshift.com/enterprise/3.1/install_config/persistent_storage/index.html)を参照してください。
+Persistence Volumeのセットアップは環境により異なるので[公式ドキュメント](https://docs.openshift.com/enterprise/3.2/install_config/persistent_storage/index.html)を参照してください。
 
 テスト目的でNFSを設定する場合は以下のように設定できます。
 
@@ -349,11 +349,11 @@ oadm diagnostics --diaglevel=0 > oadm-diagnostics.txt
 
 ### ノードのコンテナとイメージの削除
 
-ノードには[ガベージコレクション](https://docs.openshift.com/enterprise/3.1/admin_guide/garbage_collection.html)の機能があり、 停止された古いコンテナや、コンテナに利用されていないイメージは自動的に消去されるようになっています。
+ノードには[ガベージコレクション](https://docs.openshift.com/enterprise/3.2/admin_guide/garbage_collection.html)の機能があり、 停止された古いコンテナや、コンテナに利用されていないイメージは自動的に消去されるようになっています。
 
 ### 古い、既に利用されていないイメージの削除
 
-[Pruning Objectsの章](https://docs.openshift.com/enterprise/3.1/admin_guide/pruning_resources.html)で、DeploymentとBuildとイメージの削除について触れられています。
+[Pruning Objectsの章](https://docs.openshift.com/enterprise/3.2/admin_guide/pruning_resources.html)で、DeploymentとBuildとイメージの削除について触れられています。
 
 イメージはDocker registry内でディスク容量を消費するので、定期的にクリーンアップする必要がでてきます。イメージを削除するためにはイメージを参照しているDeploymentとBuildも削除する必要があるので、基本的にはこのメンテナンス作業は全て同時に行います。
 
@@ -368,7 +368,7 @@ oadm prune builds
 oadm prune builds --confirm
 ```
 
-イメージの削除を行う`oadm prune images`はOSE 3.1では技術的な制限によりcluster adminアカウントでは実行することができません。専用のユーザを用意し、`system:image-pruner`権限を付与する必要があります。`system:admin`ユーザに戻るには`oc login`に-uオプションを指定する必要があります。-uオプションではない`oc login`コマンドではユーザ名にコロンは受け付けません。
+イメージの削除を行う`oadm prune images`はOSE 3.2では技術的な制限によりcluster adminアカウントでは実行することができません。専用のユーザを用意し、`system:image-pruner`権限を付与する必要があります。`system:admin`ユーザに戻るには`oc login`に-uオプションを指定する必要があります。-uオプションではない`oc login`コマンドではユーザ名にコロンは受け付けません。
 
 ```
 oadm policy add-cluster-role-to-user system:image-pruner pruner
@@ -501,6 +501,6 @@ nsenter -n -t $PID netstat -tan
 
 ## リファレンス
 
-- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.1/welcome/index.html)
+- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.2/welcome/index.html)
 - [英語ブログ](https://blog.openshift.com/)
 

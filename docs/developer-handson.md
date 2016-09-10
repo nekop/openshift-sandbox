@@ -2,7 +2,7 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-- [OpenShift Enterprise 3.1.1 開発者向けハンズオン](#openshift-enterprise-311-%E9%96%8B%E7%99%BA%E8%80%85%E5%90%91%E3%81%91%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3)
+- [OpenShift Enterprise 3.2  開発者向けハンズオン](#openshift-enterprise-311-%E9%96%8B%E7%99%BA%E8%80%85%E5%90%91%E3%81%91%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3)
   - [準備](#%E6%BA%96%E5%82%99)
   - [OpenShiftとは](#openshift%E3%81%A8%E3%81%AF)
   - [ハンズオンシナリオの説明](#%E3%83%8F%E3%83%B3%E3%82%BA%E3%82%AA%E3%83%B3%E3%82%B7%E3%83%8A%E3%83%AA%E3%82%AA%E3%81%AE%E8%AA%AC%E6%98%8E)
@@ -34,19 +34,17 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# OpenShift Enterprise 3.1.1 開発者向けハンズオン
+# OpenShift Enterprise 3.2 開発者向けハンズオン
 
 ## 準備
 
-- このハンズオンの実行には構築済みのOpenShift Enterprise 3.1.1環境が必要です。Persistent Volumeは利用していません。
+- このハンズオンの実行には構築済みのOpenShift Enterprise 3.2環境が必要です。Persistent Volumeは利用していません。
 - 利用者のPCにgitコマンドがインストールされている必要があります。GitHubまたはその他のGitホスティングサービスが必要です。
 - ユーザは事前にocコマンドでログイン可能な状態にしておくか、もしくは全ユーザを解放するAllowポリシーの設定を行ってください。
 - 多人数で行う場合はDocker registryのディスクの空き容量に注意してください。
 - GitHubとの連携を行うためには、OpenShift EnterpriseとGitHubのネットワークが相互通信可能である必要があります。つまり、インターネット上に構築されている必要があります。
 - GitHub Enterpriseとの連携を行うためには、OpenShift EnterpriseとGitHub Enterpriseのネットワークが相互通信可能である必要があります。また、[Using self-signed SSL certificates](https://help.github.com/enterprise/11.10.340/admin/articles/using-self-signed-ssl-certificates/)の通りに`/etc/openshift/master/ca.crt`をGitHub Enterprise側にインストールする必要があります。
-- OpenShiftクライアントバイナリであるocコマンドはatomic-openshift-clients-redistributableパッケージに含まれているので、それをOpenShift管理者が利用者へ配布します。
-  - ハンズオン実施時には一時的に以下のURLから上記と同一のocコマンドをダウンロードすることもできます。bash補完ファイルを利用する場合は`/etc/bash_completion.d/oc`に配置してbashを再度開始するか、`. ~/.bash_profile`で再読み込みしてくだい。
-  - [Mac OS X](http://people.redhat.com/tkimura/ose-3.1/macosx/oc.zip) | [Linux](http://people.redhat.com/tkimura/ose-3.1/linux/oc.zip) | [Windows](http://people.redhat.com/tkimura/ose-3.1/windows/oc.zip) | [bash補完ファイル](http://people.redhat.com/tkimura/ose-3.1/bash_completion.d/oc)
+- OpenShiftクライアントバイナリであるocコマンドは[Red Hat Customer PortalのOpenShiftのダウンロードページ](https://access.redhat.com/downloads/content/290)からダウンロードできます。
 
 
 ## OpenShiftとは
@@ -126,7 +124,7 @@ oc expose service APP_NAME
 
 `oc new-app`を実行するとビルドが開始され、成功するとDockerイメージがDocker registryにpushされます。DockerイメージがpushされるとImageStreamの更新トリガーが動作し、実行用podが再作成されてアプリケーションが実行されます。
 
-`oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.1/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
+`oc new-app`コマンドでは、gitリポジトリのファイルによって[利用言語を自動検出](https://docs.openshift.com/enterprise/3.2/dev_guide/new_app.html#language-detection)し、適切なビルダーイメージを割り当てます。今回のようにindex.phpがあるとPHPのビルダーイメージが利用されます。Webコンソールではこの機能はないため、自分でビルダーイメージを選択する必要があります。
 
 `oc new-app`コマンドを実行すると、実際にはbc, dc, rc, is, svcという各種オブジェクト(後述します)と実行用podが作成されます。状態の確認には`oc status`, `oc get all`および`oc get events`を使用しますが、後述するWebコンソールのほうがCLIに慣れない最初のうちは特に見やすいので便利です。
 
@@ -475,7 +473,7 @@ prod    library/hello-php:latest   7 hours ago  172.30.55.101:5000/prod-hello/he
 
 `oc new-app`では、ソースコードではなく一般的なDockerイメージを指定することもできます。
 
-OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.1/admin_guide/manage_scc.html)があり、実行時にはランダムなUIDが割り当たります。そのため、Dockerfileで特定のユーザを作っていて特定のユーザでの動作を期待するようなDockerイメージや、USERを指定しておらずrootでの動作を前提としてしまっているイメージはそのままでは動作せず、実際にデプロイした場合はパーミッションエラーで起動しません。[Docker Hubのopenshiftユーザー](https://registry.hub.docker.com/repos/openshift/)でホストされているイメージはそのまま動作するように作られています。
+OpenShift環境では[セキュリティのためにデフォルトではUIDの利用に制限](https://docs.openshift.com/enterprise/3.2/admin_guide/manage_scc.html)があり、実行時にはランダムなUIDが割り当たります。そのため、Dockerfileで特定のユーザを作っていて特定のユーザでの動作を期待するようなDockerイメージや、USERを指定しておらずrootでの動作を前提としてしまっているイメージはそのままでは動作せず、実際にデプロイした場合はパーミッションエラーで起動しません。[Docker Hubのopenshiftユーザー](https://registry.hub.docker.com/repos/openshift/)でホストされているイメージはそのまま動作するように作られています。
 
 ```
 oc new-app openshift/jenkins-1-centos
@@ -490,7 +488,7 @@ OpenShiftではアプリケーションコンテナを複数立ち上げるこ�
 oc scale rc REPLICATION_CONFIG_NAME --replicas=2
 ```
 
-負荷に応じて自動的にスケールを制御する[オートスケール](https://docs.openshift.com/enterprise/3.1/dev_guide/pod_autoscaling.html)というものもあります。
+負荷に応じて自動的にスケールを制御する[オートスケール](https://docs.openshift.com/enterprise/3.2/dev_guide/pod_autoscaling.html)というものもあります。
 
 OpenShiftのpodのデプロイ方法は2つ`Rolling`と`Recreate`があり、デフォルトは`Rolling`です。`Rolling`では新しいpodを生成してから古いpodを停止する、というのを1つずつ行うローリングアップデートであり、ベーシックな無停止リリースが可能となっています。
 
@@ -596,12 +594,12 @@ oc export bc,is,dc,svc --all --as-template=hello-php
   - どうしてもファイルベースでということであれば、PersistentVolumeをアタッチしてそちらに出力するという方法もあります。
 - カスタマイズはできますか？
   - はい、OpenShiftのほぼ全てがAPIで構成され、プログラマブルになっています。ocコマンドもWebコンソールも基本的にはAPIを叩いているだけのAPIクライアント実装です。
-  - ビルドされるイメージをカスタマイズしたい場合は、[`.sti/bin`ディレクトリにカスタムの`assemble`, `run`スクリプトを含めるか、カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.1/creating_images/s2i.html)します。
-  - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.1/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
+  - ビルドされるイメージをカスタマイズしたい場合は、[`.sti/bin`ディレクトリにカスタムの`assemble`, `run`スクリプトを含めるか、カスタムのビルダーイメージを作成](https://docs.openshift.com/enterprise/3.2/creating_images/s2i.html)します。
+  - アプリケーションのpodの開始、終了の前後処理を行う[ライフサイクルフック](https://docs.openshift.com/enterprise/3.2/dev_guide/deployments.html#pod-based-lifecycle-hook)が定義できます。
 
 
 ## リファレンス
 
-- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.1/welcome/index.html)
+- [英語公式ドキュメント](https://docs.openshift.com/enterprise/3.2/welcome/index.html)
 - [英語ブログ](https://blog.openshift.com/)
 
