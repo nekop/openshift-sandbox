@@ -103,7 +103,7 @@ nodes
 
 [OSEv3:vars]
 ansible_ssh_user=cloud-user
-ansible_sudo=true
+ansible_become=true
 deployment_type=openshift-enterprise
 openshift_master_identity_providers=[{'name': 'allow_all', 'login': 'true', 'challenge': 'true', 'kind': 'AllowAllPasswordIdentityProvider'}]
 osm_default_subdomain=apps.example.com
