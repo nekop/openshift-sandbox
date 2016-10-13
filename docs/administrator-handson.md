@@ -149,7 +149,7 @@ sudo mkdir -p /exports
 sudo chown -R nfsnobody:nfsnobody /exports
 sudo chmod 777 /exports/
 sudo sh -c "cat << EOM > /etc/exports
-/exports *(rw,sync,root_squash)
+/exports *(rw,sync,root_squash,no_wdelay)
 EOM"
 sudo iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 2049 -j ACCEPT
 sudo service iptables save

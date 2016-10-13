@@ -255,7 +255,7 @@ mkdir -p /exports
 chown -R nfsnobody:nfsnobody /exports
 chmod 770 /exports/
 sh -c "cat << EOM > /etc/exports
-/exports *(rw,sync,root_squash)
+/exports *(rw,sync,root_squash,no_wdelay)
 EOM"
 iptables -I INPUT -p tcp -m state --state NEW -m tcp --dport 2049 -j ACCEPT
 service iptables save
