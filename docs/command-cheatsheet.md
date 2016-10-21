@@ -353,9 +353,43 @@ echo "metricsPublicURL: https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics"
 
 No PV example.
 
+For 3.3:
+
 ```
-KIBANA_HOSTNAME=
-PUBLIC_MASTER_URL=
+SUBDOMAIN=
+ENABLE_OPS_CLUSTER=false
+KIBANA_HOSTNAME=kibana.$SUBDOMAIN
+PUBLIC_MASTER_URL=https://$(hostname):8443
+KIBANA_OPS_HOSTNAME=kibana-ops.$SUBDOMAIN
+
+oadm new-project logging --node-selector=""
+oc project logging
+oc new-app logging-deployer-account-template
+oadm policy add-cluster-role-to-user oauth-editor system:serviceaccount:logging:logging-deployer
+oadm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
+oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
+oc label node --all logging-infra-fluentd=true
+oc create configmap logging-deployer \
+  --from-literal kibana-hostname=$KIBANA_HOSTNAME \
+  --from-literal enable-ops-cluster=$ENABLE_OPS_CLUSTER \
+  --from-literal kibana-ops-hostname=$KIBANA_OPS_HOSTNAME \
+  --from-literal public-master-url=$PUBLIC_MASTER_URL \
+  --from-literal es-cluster-size=1 \
+  --from-literal es-instance-ram=8G
+oc new-app logging-deployer-template
+
+echo "Make sure to add the follwoing to the master-config.xml and restart master."
+echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
+```
+
+For 3.2 or lower:
+
+```
+SUBDOMAIN=
+ENABLE_OPS_CLUSTER=false
+KIBANA_HOSTNAME=kibana.$SUBDOMAIN
+PUBLIC_MASTER_URL=https://$(hostname):8443
+KIBANA_OPS_HOSTNAME=kibana-ops.$SUBDOMAIN
 
 oadm new-project logging --node-selector=""
 oc project logging
@@ -372,7 +406,7 @@ oc policy add-role-to-user edit system:serviceaccount:logging:logging-deployer
 oadm policy add-scc-to-user privileged system:serviceaccount:logging:aggregated-logging-fluentd
 oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
 oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
-oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME=$KIBANA_HOSTNAME,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=$PUBLIC_MASTER_URL | oc create -f -
+oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME=$KIBANA_HOSTNAME,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=$PUBLIC_MASTER_URL,ENABLE_OPS_CLUSTER=$ENABLE_OPS_CLUSTER,KIBANA_OPS_HOSTNAME,$KIBANA_OPS_HOSTNAME | oc create -f -
 
 echo "Make sure to add the follwoing to the master-config.xml and restart master."
 echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
