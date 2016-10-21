@@ -456,8 +456,7 @@ sosreport -e docker -k docker.all=on
 OpenShiftは残念ながらまだsosreportに対応していないため、設定やログは別途取得する必要があります。
 
 ```
-journalctl -u atomic-openshift-master -u atomic-openshift-master-api -u atomic-openshift-master-controllers > `hostname`-openshift-master.log
-journalctl -u atomic-openshift-node   > `hostname`-openshift-node.log
+journalctl -u atomic-openshift-node -u atomic-openshift-master -u atomic-openshift-master-api -u atomic-openshift-master-controllers | gzip > `hostname`-openshift.log.gz
 tar czf `hostname`-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
 ```
 
