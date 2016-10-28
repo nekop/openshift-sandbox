@@ -147,6 +147,36 @@ oc get all,pvc,quota,limits -o yaml > oc-get-all-yaml-$PROJECT.txt
 oc get event > oc-get-event-$PROJECT.txt
 ```
 
+Using shell script:
+
+```
+#!/bin/bash
+
+PROJECT=$1
+
+if [ -z $PROJECT ]; then
+  echo "Usage: $0 project &> out.txt"
+  exit 1
+fi
+
+set -x
+
+date
+oc project $PROJECT
+oc get all,pvc,quota,limits -o wide
+oc get all,pvc,quota,limits -o yaml
+oc get event -w &
+WATCH_PID=$!
+sleep 5
+kill $WATCH_PID
+PODS=$(oc get pod -o name)
+for pod in $PODS; do
+    oc logs $pod
+    oc logs -p $pod
+done
+date
+```
+
 ## Claim PersistentVolume
 
 ```
