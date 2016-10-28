@@ -4,6 +4,12 @@ This is command cheat sheet for OpenShift Enterprise (OSE).
 
 For more command examples please refer to https://github.com/openshift/origin/blob/master/docs/generated/oc_by_example_content.adoc
 
+## Create an app
+
+```
+oc new-app $GIT_URL
+```
+
 ## List project
 
 ```
@@ -88,6 +94,13 @@ oc explain dc.spec
 
 ```
 oc export is,bc,dc,svc --as-template=app.yaml
+```
+
+## Create build from local Dockerfile and deploy
+
+```
+cat Dockerfile | oc new-build --dockerfile=- --to=$APP_NAME
+oc new-app $APP_NAME
 ```
 
 ## Debug
