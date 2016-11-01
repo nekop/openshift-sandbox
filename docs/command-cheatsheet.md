@@ -103,6 +103,14 @@ cat Dockerfile | oc new-build --dockerfile=- --to=$APP_NAME
 oc new-app $APP_NAME
 ```
 
+## Create build from local dir with Dockerfile and deploy
+
+```
+oc new-build --strategy=docker --binary=true --name=$APP_NAME
+oc start-build $APP_NAME --from-dir=.
+oc new-app $APP_NAME
+```
+
 ## Debug
 
 ```
