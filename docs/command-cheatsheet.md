@@ -495,3 +495,12 @@ oc login -u "system:admin"
 ansible masters -a "sudo systemctl restart atomic-openshift-master"
 ansible nodes -a "sudo systemctl restart atomic-openshift-node"
 ```
+
+## Playbooks
+
+```
+ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/adhoc/uninstall.yml
+ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/config.yml
+ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_3/upgrade.yml
+ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/openshift_facts.yml
+```
