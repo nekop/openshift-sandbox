@@ -59,6 +59,14 @@ oc get pod -o wide
 oc get pod -o name
 ```
 
+## Get specific item using Go template (for scripting)
+
+```
+oc get dc docker-registry --template='{{range .spec.template.spec.containers}}{{.image}}{{end}}'
+oc get service docker-registry --template='{{.spec.clusterIP}}'
+oc get pod docker-registry-2-xxx --template='{{.status.podIP}}'
+```
+
 ## Get pod log
 
 ```
