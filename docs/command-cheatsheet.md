@@ -302,7 +302,7 @@ curl --cacert /etc/origin/master/ca.crt -H "Authorization: Bearer $(oc whoami -t
 ## Dump etcd
 
 ```
-curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/master.etcd-client.crt --key /etc/origin/master/master.etcd-client.key https://`hostname`:4001/v2/keys/?recursive=true > etcd.dump
+curl --cacert /etc/origin/master/ca.crt --cert /etc/origin/master/master.etcd-client.crt --key /etc/origin/master/master.etcd-client.key https://$(hostname):4001/v2/keys/?recursive=true > etcd.dump
 cat etcd.dump | python -mjson.tool > etcd.dump.pretty
 ```
 
@@ -324,7 +324,7 @@ systemctl restart nfs-server
 ## Create PVs on master node
 
 ```
-SERVER=`hostname`
+SERVER=$(hostname)
 COUNT=50
 
 mkdir -p /exports
