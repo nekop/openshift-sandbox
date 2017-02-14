@@ -1,6 +1,6 @@
 # OpenShift Enterprise command cheat sheet
 
-This is command cheat sheet for OpenShift Enterprise (OSE).
+This is command cheat sheet for OpenShift Container Platform.
 
 For more command examples please refer to https://github.com/openshift/origin/blob/master/docs/generated/oc_by_example_content.adoc
 
@@ -127,25 +127,9 @@ oc debug dc $DC_NAME --as-root=true
 oc debug dc $DC_NAME --node-name=$NODENAME
 ```
 
-## Troubleshoot OSE infrastructure
+## Troubleshoot OpenShift
 
-It includes docker, openshift services, node, docker-registry and router in default project
-
-```
-oc project default
-oc version        > oc-version.txt
-oc get node       > oc-get-node.txt
-oc describe node  > oc-describe-node.txt
-oc get hostsubnet > oc-get-hostsubnet.txt
-oc get event      > oc-get-event-default.txt
-oc get all,pvc,quota,limits -o wide   > oc-get-all-default.txt
-oc get all,pvc,quota,limits -o yaml   > oc-get-all-yaml-default.txt
-oadm diagnostics --diaglevel=0 > oadm-diagnostics.txt
-```
-
-Get docker-registry and router logs by `oc get logs $POD_NAME` if needed.
-
-As root:
+For infrastructure level issues, get sosreport, logs and configs as root user:
 
 ```
 sosreport -e docker -k docker.all=on
@@ -153,16 +137,7 @@ journalctl -u atomic-openshift-node -u atomic-openshift-master -u atomic-openshi
 tar czf $(hostname)-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
 ```
 
-## Troubleshoot specific project
-
-```
-oc project $PROJECT
-oc get all,pvc,quota,limits -o wide > oc-get-all-$PROJECT.txt
-oc get all,pvc,quota,limits -o yaml > oc-get-all-yaml-$PROJECT.txt
-oc get event > oc-get-event-$PROJECT.txt
-```
-
-Using shell script:
+For project, use shell script:
 
 ```
 #!/bin/bash
@@ -170,26 +145,44 @@ Using shell script:
 PROJECT=$1
 
 if [ -z $PROJECT ]; then
-  echo "Usage: $0 project &> out.txt"
+  echo "Usage: $0 PROJECT_NAME"
   exit 1
 fi
 
-set -x
-
-date
-oc project $PROJECT
-oc get all,pvc,quota,limits -o wide
-oc get all,pvc,quota,limits -o yaml
-oc get event -w &
-WATCH_PID=$!
-sleep 5
-kill $WATCH_PID
-PODS=$(oc get pod -o name)
-for pod in $PODS; do
-    oc logs $pod
-    oc logs -p $pod
-done
-date
+(
+  set -x
+  date
+  oc project $PROJECT
+  oc version
+  oc get all,pvc,quota,limits,sa,secrets -o wide
+  oc get all,pvc,quota,limits,sa,secrets -o yaml
+  oc get event -w &
+  WATCH_PID=$!
+  sleep 5
+  kill $WATCH_PID
+  PODS=$(oc get pod -o name)
+  for pod in $PODS; do
+      oc logs $pod
+      oc logs -p $pod
+  done
+  if [ "$PROJECT" == "logging" ]; then
+    PODS=$(oc get pod -o name | grep kibana)
+    for pod in $PODS; do
+        oc logs $pod --container=kibana
+        oc logs -p $pod --container=kibana
+        oc logs $pod --container=kibana-proxy
+        oc logs -p $pod --container=kibana-proxy
+    done
+  fi
+  if [ "$PROJECT" == "default" ]; then
+    oc get node -o wide
+    oc get node -o yaml
+    oc describe node
+    oc get hostsubnet
+    oadm diagnostics --diaglevel=0
+  fi
+  date
+) 2>&1 | gzip > $PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
 ```
 
 ## Claim PersistentVolume
