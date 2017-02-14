@@ -5,7 +5,7 @@ COPY nginx.repo /etc/yum.repos.d/nginx.repo
 COPY nginx.conf /opt/nginx/nginx.conf
 RUN yum install -y --setopt=tsflags=nodocs --disablerepo=\* --enablerepo=rhel-7-server-rpms --enablerepo=nginx nginx && \
     yum clean all && \
-    chmod 777 /opt/nginx
+    chmod 777 -R /opt/nginx
 
 WORKDIR /opt/nginx
 
