@@ -1,5 +1,5 @@
 [nginx]
 name=nginx repo
 baseurl=http://nginx.org/packages/mainline/rhel/7/$basearch/
-gpgcheck=1
+gpgcheck=0
 enabled=1
