@@ -9,6 +9,8 @@ RUN yum install -y --setopt=tsflags=nodocs --disablerepo=\* --enablerepo=rhel-7-
 
 COPY nginx.conf /opt/nginx
 
+WORKDIR /opt/nginx
+
 USER 432879
 EXPOSE 8080
 CMD [ "nginx", "-c", "/opt/nginx/nginx.conf" ]
