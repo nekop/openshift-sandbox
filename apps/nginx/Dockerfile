@@ -2,12 +2,10 @@ FROM registry.access.redhat.com/rhel7/rhel:latest
 MAINTAINER Takayoshi Kimura <tkimura@redhat.com>
 
 COPY nginx.repo /etc/yum.repos.d/nginx.repo
+COPY nginx.conf /opt/nginx/nginx.conf
 RUN yum install -y --setopt=tsflags=nodocs --disablerepo=\* --enablerepo=rhel-7-server-rpms --enablerepo=nginx nginx && \
     yum clean all && \
-    mkdir -p /opt/nginx && \
     chmod 777 /opt/nginx
-
-COPY nginx.conf /opt/nginx
 
 WORKDIR /opt/nginx
 
