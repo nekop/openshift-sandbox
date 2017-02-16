@@ -132,7 +132,14 @@ oc debug dc $DC_NAME --node-name=$NODENAME
 For infrastructure level issues, get sosreport, logs and configs as root user:
 
 ```
+# Make sure to install or update sos latest version
+rpm -q sos || yum install sos -y; rpm -q sos && yum update sos -y
 sosreport -e docker -k docker.all=on
+```
+
+To get only openshift logs and configs:
+
+```
 journalctl -u atomic-openshift-node -u atomic-openshift-master -u atomic-openshift-master-api -u atomic-openshift-master-controllers | gzip > $(hostname)-openshift.log.gz
 tar czf $(hostname)-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
 ```
@@ -154,6 +161,7 @@ fi
   date
   oc project $PROJECT
   oc version
+  oc status
   oc get all,pvc,quota,limits,sa,secrets -o wide
   oc get all,pvc,quota,limits,sa,secrets -o yaml
   oc get event -w &
