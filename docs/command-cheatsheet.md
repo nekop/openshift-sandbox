@@ -149,6 +149,8 @@ For project, use shell script:
 ```
 #!/bin/bash
 
+# dump-project.sh PROJECT_NAME
+
 PROJECT=$1
 
 if [ -z $PROJECT ]; then
@@ -156,6 +158,7 @@ if [ -z $PROJECT ]; then
   exit 1
 fi
 
+DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
 (
   set -x
   date
@@ -170,19 +173,15 @@ fi
   kill $WATCH_PID
   PODS=$(oc get pod -o name)
   for pod in $PODS; do
-      oc logs $pod
-      oc logs -p $pod
+      CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
+{{end}}')
+      for c in $CONTAINERS; do
+      oc logs $pod --container=$c
+      oc logs -p $pod --container=$c
+      done
   done
-  if [ "$PROJECT" == "logging" ]; then
-    PODS=$(oc get pod -o name | grep kibana)
-    for pod in $PODS; do
-        oc logs $pod --container=kibana
-        oc logs -p $pod --container=kibana
-        oc logs $pod --container=kibana-proxy
-        oc logs -p $pod --container=kibana-proxy
-    done
-  fi
-  if [ "$PROJECT" == "default" ]; then
+  # if admin get additional info
+  if [ "$(oc policy can-i get nodes)" == "yes" ]; then
     oc get node -o wide
     oc get node -o yaml
     oc describe node
@@ -190,7 +189,9 @@ fi
     oadm diagnostics --diaglevel=0
   fi
   date
-) 2>&1 | gzip > $PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
+) 2>&1 | gzip > $DEST
+echo "Generated $DEST"
+# end
 ```
 
 ## Claim PersistentVolume
