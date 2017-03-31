@@ -173,12 +173,12 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   kill $WATCH_PID
   PODS=$(oc get pod -o name)
   for pod in $PODS; do
-      CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
+    CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
 {{end}}')
-      for c in $CONTAINERS; do
+    for c in $CONTAINERS; do
       oc logs $pod --container=$c
       oc logs -p $pod --container=$c
-      done
+    done
   done
   # if admin get additional info
   if [ "$(oc policy can-i get nodes)" == "yes" ]; then
