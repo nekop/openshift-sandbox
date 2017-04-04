@@ -390,6 +390,7 @@ No PV example.
 
 ```
 HAWKULAR_METRICS_HOSTNAME=
+IMAGE_VERSION=v3.4
 
 oc project openshift-infra
 oc secrets new metrics-deployer nothing=/dev/null
@@ -401,9 +402,10 @@ metadata:
 secrets:
 - name: metrics-deployer
 EOF
+oadm policy add-role-to-user view system:serviceaccount:openshift-infra:hawkular
 oadm policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-deployer
 oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:heapster
-oc process -f /usr/share/openshift/examples/infrastructure-templates/enterprise/metrics-deployer.yaml -v HAWKULAR_METRICS_HOSTNAME=$HAWKULAR_METRICS_HOSTNAME,USE_PERSISTENT_STORAGE=false,REDEPLOY=true | oc create -f -
+oc process -f /usr/share/openshift/hosted/metrics-deployer.yaml -v HAWKULAR_METRICS_HOSTNAME=$HAWKULAR_METRICS_HOSTNAME -v IMAGE_VERSION=$IMAGE_VERSION -v USE_PERSISTENT_STORAGE=false | oc create -f -
 
 echo "Make sure to add the follwoing to the master-config.xml and restart master. Note the URL should end with '/hawkular/metrics'"
 echo "metricsPublicURL: https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics"
