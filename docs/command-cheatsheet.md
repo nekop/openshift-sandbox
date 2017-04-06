@@ -165,6 +165,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   oc project $PROJECT
   oc version
   oc status
+  oc get project $PROJECT -o yaml
   oc get all,pvc,hpa,quota,limits,sa,secrets -o wide
   oc get all,pvc,hpa,quota,limits,sa,secrets -o yaml
   oc get event -w &
