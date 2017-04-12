@@ -119,6 +119,12 @@ oc start-build $APP_NAME --from-dir=.
 oc new-app $APP_NAME
 ```
 
+## Allow access to OpenShift API from default application service account
+
+```
+oc policy add-role-to-user view -z default
+```
+
 ## Debug
 
 ```
@@ -240,30 +246,8 @@ oc patch dc $DC_NAME -p "spec:
 ## Define livenessProve and readinessProve in DeploymentConfig
 
 ```
-oc patch dc $DC_NAME -p "spec:
-  template:
-    spec:
-      containers:
-      - name: $CONTAINER_NAME
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /
-            port: 8080
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5"
+oc set probe dc/webapp --readiness --get-url=http://:8080/healthz --initial-delay-seconds=10
+oc set probe dc/webapp --liveness --get-url=http://:8080/healthz --initial-delay-seconds=10
 ```
 
 ## Define Horizontal Pod Autoscaler (hpa)
