@@ -229,25 +229,14 @@ oc volume dc nexus --add --name=nexus-storage -t pvc --claim-name=nexus --claim-
 ## Define resource requests and limits in DeploymentConfig
 
 ```
-oc patch dc $DC_NAME -p "spec:
-  template:
-    spec:
-      containers:
-      - name: $CONTAINER_NAME
-        resources:
-          limits:
-            cpu: 500m
-            memory: 512Mi
-          requests:
-            cpu: 500m
-            memory: 512Mi"
+oc set resources deployment nginx --limits=cpu=200m,memory=512Mi --requests=cpu=100m,memory=256Mi
 ```
 
 ## Define livenessProve and readinessProve in DeploymentConfig
 
 ```
-oc set probe dc/webapp --readiness --get-url=http://:8080/healthz --initial-delay-seconds=10
-oc set probe dc/webapp --liveness --get-url=http://:8080/healthz --initial-delay-seconds=10
+oc set probe dc/nginx --readiness --get-url=http://:8080/healthz --initial-delay-seconds=10
+oc set probe dc/nginx --liveness --get-url=http://:8080/healthz --initial-delay-seconds=10
 ```
 
 ## Define Horizontal Pod Autoscaler (hpa)
