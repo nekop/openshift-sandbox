@@ -194,7 +194,6 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   oc get event -w &
   WATCH_PID=$!
   sleep 5
-  kill $WATCH_PID
   PODS=$(oc get pod -o name)
   for pod in $PODS; do
     CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
@@ -204,6 +203,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
       oc logs -p $pod --container=$c
     done
   done
+  kill $WATCH_PID
   # if admin get additional info
   if [ "$(oc policy can-i get nodes)" == "yes" ]; then
     oc get node -o wide
