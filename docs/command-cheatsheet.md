@@ -185,6 +185,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
 (
   set -x
   date
+  oc whoami
   oc project $PROJECT
   oc version
   oc status -v
