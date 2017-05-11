@@ -157,7 +157,7 @@ For infrastructure level issues, get sosreport, logs and configs as root user:
 ```
 # Make sure to install or update sos latest version
 rpm -q sos || yum install sos -y; rpm -q sos && yum update sos -y
-sosreport -e docker -k docker.all=on
+sosreport -k docker.all=on -k docker.logs=on
 ```
 
 To get only openshift logs and configs:
