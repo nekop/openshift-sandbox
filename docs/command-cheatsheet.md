@@ -70,13 +70,13 @@ oc get pod docker-registry-2-xxx --template='{{.status.podIP}}'
 ## Get pod log
 
 ```
-oc get logs $POD_NAME
+oc logs $POD_NAME --timestamps
 ```
 
 ## Get CrashLoop pod log
 
 ```
-oc get logs -p $POD_NAME
+oc logs -p $POD_NAME --timestamps
 ```
 
 ## rsh into pod
@@ -200,8 +200,8 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
     CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
 {{end}}')
     for c in $CONTAINERS; do
-      oc logs $pod --container=$c
-      oc logs -p $pod --container=$c
+      oc logs $pod --container=$c --timestamps
+      oc logs -p $pod --container=$c --timestamps
     done
   done
   kill $WATCH_PID
