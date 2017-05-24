@@ -143,8 +143,9 @@ oc patch dc rhel7 -p 'spec:
       containers:
       - name: rhel7
         command:
-        - sleep
-        - "3600"'
+        - tail
+        - -f
+        - /dev/null
 oc volume dc/rhel7 --add -t pvc --name=test --claim-name=test --mount-path=/test
 oc rsh rhel7-X-XXXXX
 oc delete all -l app=rhel7
