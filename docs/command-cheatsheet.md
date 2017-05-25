@@ -191,8 +191,10 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   oc version
   oc status -v
   oc get project $PROJECT -o yaml
-  oc get all,pvc,hpa,quota,limits,sa,rolebinding,configmap,secret -o wide
-  oc get all,pvc,hpa,quota,limits,sa,rolebinding,configmap,secret -o yaml
+  oc get all,pvc,hpa,quota,limits,sa,rolebinding,secret -o wide
+  oc get daemonset,configmap -o wide # separated because not supported in v3.1
+  oc get all,pvc,hpa,quota,limits,sa,rolebinding,secret -o wide
+  oc get daemonset,configmap -o yaml
   oc get event -w &
   WATCH_PID=$!
   sleep 5
