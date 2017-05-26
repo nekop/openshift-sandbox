@@ -1,4 +1,4 @@
-# OpenShift Enterprise command cheat sheet
+# OpenShift command cheat sheet
 
 This is command cheat sheet for OpenShift Container Platform.
 
@@ -511,3 +511,4 @@ ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/config.
 ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/openshift-cluster/upgrades/v3_3/upgrade.yml
 ansible-playbook -vvv /usr/share/ansible/openshift-ansible/playbooks/byo/openshift_facts.yml
 ```
+
