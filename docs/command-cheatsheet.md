@@ -176,7 +176,7 @@ For project, use shell script:
 # dump-project.sh PROJECT_NAME
 
 # If you prefer multiple files, you can split it:
-#   zcat *.txt.gz | awk -e 'BEGIN{f=""}  match($0, /^+ ((oc|date).*)$/, a){f=a[1] ".txt"; gsub(/[ \/=]/,"_",f);} {print $0 >> f}'
+#   zcat *.txt.gz | awk 'BEGIN{f=""}  match($0, /^+ ((oc|date).*)$/, a){f=a[1] ".txt"; gsub(/[ \/=]/,"_",f);} {print $0 >> f}'
 
 PROJECT=$1
 
