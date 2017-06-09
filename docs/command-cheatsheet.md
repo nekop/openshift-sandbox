@@ -217,7 +217,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
     oc get node -o yaml
     oc describe node
     oc get hostsubnet
-    oadm diagnostics --diaglevel=0
+    oc adm diagnostics --diaglevel=0
   fi
   date
 ) 2>&1 | gzip > $DEST
