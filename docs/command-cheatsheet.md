@@ -145,7 +145,7 @@ oc patch dc rhel7 -p 'spec:
         command:
         - tail
         - -f
-        - /dev/null
+        - /dev/null'
 oc volume dc/rhel7 --add -t pvc --name=test --claim-name=test --mount-path=/test
 oc rsh rhel7-X-XXXXX
 oc delete all -l app=rhel7
