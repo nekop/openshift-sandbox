@@ -151,6 +151,12 @@ oc rsh rhel7-X-XXXXX
 oc delete all -l app=rhel7
 ```
 
+## Get metics
+
+```
+oc adm top pod --heapster-namespace=openshift-infra --heapster-scheme=https
+```
+
 ## Troubleshoot OpenShift
 
 For infrastructure level issues, get sosreport, logs and configs as root user:
