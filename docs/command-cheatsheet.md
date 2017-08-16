@@ -136,19 +136,10 @@ oc debug dc $DC_NAME --node-name=$NODENAME
 ## Mount PVC used by other pod for maintenance
 
 ```
-oc new-app registry.access.redhat.com/rhel7
-oc patch dc rhel7 -p 'spec:
-  template:
-    spec:
-      containers:
-      - name: rhel7
-        command:
-        - tail
-        - -f
-        - /dev/null'
-oc volume dc/rhel7 --add -t pvc --name=test --claim-name=test --mount-path=/test
-oc rsh rhel7-X-XXXXX
-oc delete all -l app=rhel7
+oc run sleep --image=registry.access.redhat.com/rhel7 -- tail -f /dev/null
+oc volume dc/sleep --add -t pvc --name=test --claim-name=test --mount-path=/test
+oc rsh sleep-X-XXXXX
+oc delete all -l app=sleep
 ```
 
 ## Get metics
