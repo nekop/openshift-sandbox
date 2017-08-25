@@ -142,7 +142,7 @@ oc rsh sleep-X-XXXXX
 oc delete all -l app=sleep
 ```
 
-## Get metics
+## Get metrics
 
 ```
 oc adm top pod --heapster-namespace=openshift-infra --heapster-scheme=https
@@ -402,7 +402,7 @@ oadm policy add-role-to-user edit system:serviceaccount:openshift-infra:metrics-
 oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:openshift-infra:heapster
 oc process -f /usr/share/openshift/hosted/metrics-deployer.yaml -v HAWKULAR_METRICS_HOSTNAME=$HAWKULAR_METRICS_HOSTNAME -v IMAGE_VERSION=$IMAGE_VERSION -v USE_PERSISTENT_STORAGE=false | oc create -f -
 
-echo "Make sure to add the follwoing to the master-config.xml and restart master. Note the URL should end with '/hawkular/metrics'"
+echo "Make sure to add the following to the master-config.xml and restart master. Note the URL should end with '/hawkular/metrics'"
 echo "metricsPublicURL: https://$HAWKULAR_METRICS_HOSTNAME/hawkular/metrics"
 ```
 
@@ -435,7 +435,7 @@ oc create configmap logging-deployer \
   --from-literal es-instance-ram=8G
 oc new-app logging-deployer-template
 
-echo "Make sure to add the follwoing to the master-config.xml and restart master."
+echo "Make sure to add the following to the master-config.xml and restart master."
 echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
 ```
 
@@ -465,7 +465,7 @@ oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:loggin
 oadm policy add-cluster-role-to-user cluster-reader system:serviceaccount:logging:aggregated-logging-fluentd
 oc process logging-deployer-template -n openshift -v KIBANA_HOSTNAME=$KIBANA_HOSTNAME,ES_CLUSTER_SIZE=1,PUBLIC_MASTER_URL=$PUBLIC_MASTER_URL,ENABLE_OPS_CLUSTER=$ENABLE_OPS_CLUSTER,KIBANA_OPS_HOSTNAME,$KIBANA_OPS_HOSTNAME | oc create -f -
 
-echo "Make sure to add the follwoing to the master-config.xml and restart master."
+echo "Make sure to add the following to the master-config.xml and restart master."
 echo "loggingPublicURL: https://$KIBANA_HOSTNAME/"
 ```
 
