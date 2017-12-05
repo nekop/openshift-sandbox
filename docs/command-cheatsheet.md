@@ -1,8 +1,6 @@
 # OpenShift command cheat sheet
 
-This is command cheat sheet for OpenShift Container Platform.
-
-For more command examples please refer to https://github.com/openshift/origin/blob/master/docs/generated/oc_by_example_content.adoc
+This is command cheat sheet for OpenShift.
 
 ## Create an app
 
