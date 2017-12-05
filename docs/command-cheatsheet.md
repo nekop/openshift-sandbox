@@ -22,23 +22,10 @@ oc get project
 oc get all
 ```
 
-Output includes:
-
-- buildconfig
-- build
-- imagestream
-- deploymentconfig
-- replicationcontroller
-- service
-- pod
-
-`pvc` is not included in the `all`, so you may want `oc get all,pvc`.
-
-
 ## Delete all in project
 
 ```
-oc delete all,pvc --all
+oc delete all --all
 ```
 
 ## List pod
