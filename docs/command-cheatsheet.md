@@ -146,8 +146,8 @@ sosreport -k docker.all=on -k docker.logs=on
 To get only openshift logs and configs:
 
 ```
-journalctl -u atomic-openshift-node -u atomic-openshift-master -u atomic-openshift-master-api -u atomic-openshift-master-controllers | gzip > $(hostname)-openshift.log.gz
-tar czf $(hostname)-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker*
+journalctl | gzip > $(hostname)-journal-$(date +%Y%m%d%H%M%S).log.gz
+tar czf $(hostname)-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker* /etc/etcd
 ```
 
 For project, use shell script:
@@ -199,6 +199,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
     oc get node -o yaml
     oc describe node
     oc get hostsubnet
+    oc get clusterrolebindings
     oc adm diagnostics --diaglevel=0
   fi
   date
