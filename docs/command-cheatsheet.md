@@ -182,9 +182,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   oc get daemonset,configmap -o wide # separated because not supported in v3.1
   oc get all,pvc,hpa,quota,limits,sa,rolebinding,secret -o yaml
   oc get daemonset,configmap -o yaml
-  oc get event -w &
-  WATCH_PID=$!
-  sleep 5
+  timeout 15 oc get event -w &
   PODS=$(oc get pod -o name)
   for pod in $PODS; do
     CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
@@ -194,7 +192,6 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
       oc logs -p $pod --container=$c --timestamps
     done
   done
-  kill $WATCH_PID
   # if admin get additional info
   if [ "$(oc policy can-i get nodes)" == "yes" ]; then
     oc get node -o wide
