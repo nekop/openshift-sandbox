@@ -199,7 +199,6 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
     oc describe node
     oc get hostsubnet
     oc get clusterrolebindings
-    oc adm diagnostics --diaglevel=0
   fi
   date
 ) 2>&1 | gzip > $DEST
