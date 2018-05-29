@@ -150,7 +150,9 @@ journalctl | gzip > $(hostname)-journal-$(date +%Y%m%d%H%M%S).log.gz
 tar czf $(hostname)-openshift-config.tar.gz /etc/origin /etc/sysconfig/atomic-openshift-*  /etc/sysconfig/docker* /etc/etcd
 ```
 
-For project, use shell script:
+For project, use OpenShift sos plugin (for v3.7+) <https://github.com/bostrt/openshift-sos-plugin>.
+
+Or use the following shell script:
 
 ```
 #!/bin/bash
