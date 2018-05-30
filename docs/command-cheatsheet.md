@@ -182,7 +182,7 @@ DEST=$PROJECT-$(date +%Y%m%d%H%M%S).txt.gz
   oc get daemonset,configmap -o wide # separated because not supported in v3.1
   oc get all,pvc,hpa,quota,limits,sa,rolebinding,secret -o yaml
   oc get daemonset,configmap -o yaml
-  timeout 15 oc get event -w &
+  timeout 15 oc get event -w
   PODS=$(oc get pod -o name)
   for pod in $PODS; do
     CONTAINERS=$(oc get $pod --template='{{range .spec.containers}}{{.name}}
