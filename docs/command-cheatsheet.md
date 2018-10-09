@@ -122,7 +122,7 @@ oc debug dc $DC_NAME --node-name=$NODENAME
 
 ```
 oc run sleep --image=registry.access.redhat.com/rhel-minimal -- tail -f /dev/null
-oc volume dc/sleep --add -t pvc --name=test --claim-name=test --mount-path=/test
+oc set volume dc/sleep --add -t pvc --name=test --claim-name=test --mount-path=/test
 oc rsh sleep-X-XXXXX
 oc delete all -l app=sleep
 ```
@@ -210,8 +210,8 @@ echo "Generated $DEST"
 
 ```
 oc new-app sonatype/nexus
-oc volume dc nexus --remove --confirm
-oc volume dc nexus --add --name=nexus-storage -t pvc --claim-name=nexus --claim-mode=ReadWriteMany --claim-size=1Gi --mount-path=/sonatype-work
+oc set volume dc nexus --remove --confirm
+oc set volume dc nexus --add --name=nexus-storage -t pvc --claim-name=nexus --claim-mode=ReadWriteMany --claim-size=1Gi --mount-path=/sonatype-work
 ```
 
 ## Define resource requests and limits in DeploymentConfig
